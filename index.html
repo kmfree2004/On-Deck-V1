@@ -1,4 +1,8 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>On Deck</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Big+Shoulders+Display:wght@700;800;900&display=swap">
@@ -95,6 +99,26 @@ button { font: inherit; color: inherit; cursor: pointer; }
 @media (max-width: 860px) {
   .about, .about-stats { grid-template-columns: minmax(0, 1fr); gap: 20px; }
 }
+
+[hidden] { display: none !important; }
+body { margin: 0; }
+
+/* Guide: email builder */
+.form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.field { display: grid; gap: 4px; font-size: 0.85rem; font-weight: 600; min-width: 0; }
+.field.wide { grid-column: 1 / -1; }
+.field input { font: inherit; font-weight: 400; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; width: 100%; min-width: 0; }
+.draft-wrap { display: grid; gap: 6px; }
+.draft { white-space: pre-wrap; overflow-wrap: anywhere; background: var(--soft); border-radius: 8px; padding: 14px 16px; font-size: 0.95rem; line-height: 1.6; }
+.draft-subject { font-weight: 600; }
+.copy-row { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+ol.steps { margin: 0; padding-left: 1.3em; display: grid; gap: 8px; }
+ol.steps li + li { margin-top: 0; }
+.table-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 0.9rem; min-width: 560px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+th { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--seam-text); }
+@media (max-width: 560px) { .form-grid { grid-template-columns: minmax(0, 1fr); } }
 
 /* Sections */
 section.block { padding-block: 72px; }
@@ -320,6 +344,7 @@ footer p { font-size: 0.92rem; opacity: 0.9; }
           <li><b>25 games</b><span>Each team played 25 games from June 9 to July 20, 2026.</span></li>
           <li><b>17 tickets</b><span>The May 4, 2026 College Draft placed 17 players who received a "Golden Ticket."</span></li>
           <li><b>On ESPN</b><span>ESPN is a broadcast partner, and Major League Baseball made a strategic investment in the league.</span></li>
+          <li><b>98%</b><span>of NCAA student-athletes go pro in something other than sports, according to the NCAA.</span></li>
         </ul>
       </div>
       <div class="card">
@@ -327,6 +352,7 @@ footer p { font-size: 0.92rem; opacity: 0.9; }
         <ul class="todo">
           <li>Pay and benefits for players, by season and role</li>
           <li>Roster size and how many new spots open each year</li>
+          <li>Softball-specific odds of moving from high school to college to pro</li>
           <li>How the Reserve Athlete Pool is chosen</li>
           <li>How players outside college can opt in</li>
           <li>What a player's year looks like outside June and July</li>
@@ -340,7 +366,7 @@ footer p { font-size: 0.92rem; opacity: 0.9; }
       <div class="card"><span class="label">Way in</span><h4>Allocation Draft</h4><p>Players who opt in can be chosen, including players from the Reserve Athlete Pool and from other pro leagues.</p></div>
       <div class="card"><span class="label">Way in</span><h4>Expansion Draft</h4><p>New teams can select players the original teams did not protect. This only happens when the league adds teams.</p></div>
     </div>
-    <p class="src">Sources: <a href="https://en.wikipedia.org/wiki/2026_AUSL_season" target="_blank" rel="noopener">2026 AUSL season (Wikipedia)</a>, <a href="https://www.mlb.com/news/athletes-unlimited-softball-league-airs-college-draft-monday" target="_blank" rel="noopener">What to know about 2026 AUSL College Draft (MLB.com)</a>, <a href="https://theausl.com/news/2025-ausl-draft-results-by-round/" target="_blank" rel="noopener">2025 AUSL Draft results (theausl.com)</a>. League details change, so check theausl.com for current information.</p>
+    <p class="src">Sources: <a href="https://en.wikipedia.org/wiki/2026_AUSL_season" target="_blank" rel="noopener">2026 AUSL season (Wikipedia)</a>, <a href="https://www.mlb.com/news/athletes-unlimited-softball-league-airs-college-draft-monday" target="_blank" rel="noopener">What to know about 2026 AUSL College Draft (MLB.com)</a>, <a href="https://theausl.com/news/2025-ausl-draft-results-by-round/" target="_blank" rel="noopener">2025 AUSL Draft results (theausl.com)</a>, and <a href="https://www.ncaa.org/sports/2024/4/15/softball-probability-of-competing-beyond-high-school.aspx" target="_blank" rel="noopener">NCAA student-athlete statistics</a>. League details change, so check theausl.com for current information.</p>
   </div>
 </section>
 
@@ -401,6 +427,17 @@ footer p { font-size: 0.92rem; opacity: 0.9; }
     <div class="chips" id="mentorChips" role="group" aria-label="Filter mentors by interest"></div>
     <div class="card-grid" id="mentorGrid"></div>
     <p class="note">Sample mentors only. In the next version, mentors will be real volunteers, screened with a partner organization, and younger players will only message through a parent or guardian.</p>
+    <div class="card" style="margin-top:24px;max-width:720px">
+      <div><span class="badge">Not live yet</span></div>
+      <h3>How mentor matching will work</h3>
+      <ul class="todo">
+        <li>A player picks a path and writes what she wants to ask. If she is under 18, a parent or guardian helps.</li>
+        <li>On Deck matches her with a screened volunteer mentor who has walked that path.</li>
+        <li>First contact goes through a parent or guardian or through On Deck, never directly with the player.</li>
+        <li>They schedule one short call or video chat.</li>
+      </ul>
+      <p class="muted" style="font-size:0.9rem">This prototype does not collect names or contact details.</p>
+    </div>
   </div>
 </section>
 
@@ -410,10 +447,11 @@ footer p { font-size: 0.92rem; opacity: 0.9; }
     <div class="sec-head">
       <span class="label">Recruiting and showcase guide</span>
       <h2>What to do at your age, in plain steps</h2>
-      <p>A free checklist for players and parents. Rules and dates change, so confirm details with the NCAA, your coach, and any program you talk to.</p>
+      <p>Checklists, email drafts and camp advice for players and parents. Rules and dates change, so confirm details with the NCAA, your coach, and any program you talk to.</p>
     </div>
-    <div style="max-width:720px">
-      <div>
+    <div class="tabs" id="guideSubTabs" role="group" aria-label="Guide sections" style="margin-bottom:24px"></div>
+    <div style="max-width:780px">
+      <div data-sub="timeline">
         <div class="tabs" id="guideTabs" role="group" aria-label="Choose an age group"></div>
         <div class="card">
           <h3 id="guideTitle"></h3>
@@ -421,6 +459,174 @@ footer p { font-size: 0.92rem; opacity: 0.9; }
           <p class="muted" id="guideCount" style="font-size:0.9rem"></p>
         </div>
         <div class="callout" style="margin-top:16px">Former players in our survey wrote that they wished they had found out about college camps and showcases sooner, and that they wanted more help during the recruiting process.</div>
+      </div>
+      <div data-sub="basics" hidden>
+        <div class="card">
+          <span class="label">Recruiting basics</span>
+          <h3>How to get seen</h3>
+          <details open><summary>How recruiting usually works</summary><ul>
+            <li>Build a list of schools, then narrow it by level, location, academics and cost.</li>
+            <li>If you plan to play at the NCAA Division I or II level, register with the NCAA Eligibility Center and keep your grades on track.</li>
+            <li>Contact coaches yourself with a short email and a skills video.</li>
+            <li>Go to camps, showcases and campus visits at schools you really like.</li>
+            <li>Compare offers, ask questions, and decide with your family.</li></ul></details>
+          <details><summary>Ways to get seen</summary><ul>
+            <li>Make a short skills video with a clear view of you, and update it each year.</li>
+            <li>Pick showcases that coaches from your target schools attend.</li>
+            <li>Ask your club or high school coach to reach out to programs for you.</li>
+            <li>Keep your stats, schedule and grades current and easy to share.</li></ul></details>
+          <details><summary>What to put in an email to a coach</summary>
+            <p>Use the Email a coach tab. It builds a draft for a first email, a camp question, a thank-you after camp, and an update.</p></details>
+          <details><summary>Questions to ask a program</summary><ul>
+            <li>How many players at my position are on the roster, and what role would I likely have?</li>
+            <li>What does a typical week look like?</li>
+            <li>How does the program support academics and injuries?</li>
+            <li>What happens to my scholarship if I get hurt?</li></ul></details>
+          <p class="muted" style="font-size:0.9rem">NCAA rules limit when coaches can start contacting recruits and how they can reply. The dates differ by division and change over time, so check the current NCAA recruiting calendar for your class year and ask your coach before you act.</p>
+        </div>
+      </div>
+
+      <div data-sub="email" hidden>
+        <div class="card">
+          <span class="label">Email a coach</span>
+          <h3>What you are hoping to get from an email</h3>
+          <p>An email is a short introduction. You are not asking for an offer. You are hoping to:</p>
+          <ul>
+            <li>Get on a coach's radar for your graduation year and position.</li>
+            <li>Find out whether the program is recruiting your class and position.</li>
+            <li>Get feedback on your video.</li>
+            <li>Learn where and when the coach will see you play.</li>
+            <li>Show real interest in the program, which coaches notice.</li>
+          </ul>
+          <p class="callout">Many first emails get no reply, and that is normal. Coaches get a lot of messages, and NCAA rules can limit how and when they reply. It is not a no. Wait three or four weeks, then send a short update with something new, such as a new video or schedule.</p>
+        </div>
+
+        <div class="card" style="margin-top:20px">
+          <h3>Draft your email</h3>
+          <p class="muted">Fill in what you know and the draft updates as you type. Brackets show what is still missing. Nothing is saved or sent from this page. Use an email address with your name in it, and have a parent or guardian read the email before you send it.</p>
+          <div class="form-grid">
+            <label class="field" for="eName">Your name<input id="eName" type="text" autocomplete="off" placeholder="Your full name"></label>
+            <label class="field" for="eYear">Graduation year<input id="eYear" type="text" autocomplete="off" placeholder="For example 2029"></label>
+            <label class="field" for="ePos">Position<input id="ePos" type="text" autocomplete="off" placeholder="Pitcher, shortstop, catcher..."></label>
+            <label class="field" for="eHS">High school<input id="eHS" type="text" autocomplete="off"></label>
+            <label class="field" for="eClub">Club team<input id="eClub" type="text" autocomplete="off"></label>
+            <label class="field" for="eGPA">GPA<input id="eGPA" type="text" autocomplete="off"></label>
+            <label class="field" for="eSchool">College you are writing to<input id="eSchool" type="text" autocomplete="off"></label>
+            <label class="field" for="eCoach">Coach's last name<input id="eCoach" type="text" autocomplete="off"></label>
+            <label class="field wide" for="eVideo">Link to your skills video<input id="eVideo" type="text" autocomplete="off" placeholder="Make sure the link is not private"></label>
+            <label class="field wide" for="eCamp">Camp name and date (for camp emails)<input id="eCamp" type="text" autocomplete="off"></label>
+            <label class="field wide" for="eEvents">Your upcoming events, with dates<input id="eEvents" type="text" autocomplete="off" placeholder="Tournament name, dates, field location"></label>
+            <label class="field wide" for="eWhy">One real reason you like this program<input id="eWhy" type="text" autocomplete="off" placeholder="Coaching style, academics, a game you watched..."></label>
+            <label class="field wide" for="eNote">Something specific (what you learned at camp, or what is new since you last wrote)<input id="eNote" type="text" autocomplete="off"></label>
+          </div>
+          <div class="chips" id="emailType" role="group" aria-label="Email type"></div>
+          <div class="draft-wrap">
+            <span class="mini-h">Subject</span>
+            <div class="draft draft-subject" id="emailSubject"></div>
+            <span class="mini-h">Email</span>
+            <div class="draft" id="emailBody"></div>
+          </div>
+          <div class="copy-row">
+            <button class="btn btn-solid" id="copyEmail" type="button">Copy email</button>
+            <span id="copyMsg" role="status" class="muted" style="font-size:0.9rem"></span>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:20px">
+          <h3>Before you hit send</h3>
+          <ul class="checklist">
+            <li><label><input type="checkbox"><span>The coach's name and the school's name are right. Wrong-school emails get noticed.</span></label></li>
+            <li><label><input type="checkbox"><span>The subject line says who you are: graduation year, position and name.</span></label></li>
+            <li><label><input type="checkbox"><span>Your video link opens without a login.</span></label></li>
+            <li><label><input type="checkbox"><span>It is short enough to read in under a minute.</span></label></li>
+            <li><label><input type="checkbox"><span>You read it out loud, and a parent or guardian read it too.</span></label></li>
+            <li><label><input type="checkbox"><span>You added the date to your tracker so you can follow up.</span></label></li>
+          </ul>
+        </div>
+
+        <div class="card" style="margin-top:20px">
+          <h3>Keep a simple tracker</h3>
+          <p class="muted">A spreadsheet is enough. Track every school so you know who to follow up with and when.</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>School</th><th>Coach</th><th>Emailed</th><th>Reply</th><th>Camp or event</th><th>Next step</th></tr></thead>
+              <tbody><tr><td>Example University</td><td>Coach Smith</td><td>Nov 20</td><td>None yet</td><td>Spring prospect camp</td><td>Send an update in three weeks</td></tr></tbody>
+            </table>
+          </div>
+          <p class="muted" style="font-size:0.9rem">The row above is an example only.</p>
+        </div>
+      </div>
+
+      <div data-sub="camps" hidden>
+        <div class="card">
+          <span class="label">Camps and showcases</span>
+          <h3>What you are hoping to get from them</h3>
+          <ul>
+            <li>Be seen by coaches who recruit your position and graduation year.</li>
+            <li>Get honest feedback on where you stand compared with the level you are aiming for.</li>
+            <li>See the campus, the facilities and how the coaches teach.</li>
+            <li>Meet current players and ask what the program is really like.</li>
+            <li>Find out whether it feels like a fit. A camp is a test for you too.</li>
+          </ul>
+          <p class="callout">A camp invite, or a good day at camp, does not mean a coach plans to offer you a spot. Ask directly: "Where do I stand with your program?"</p>
+        </div>
+
+        <div class="card" style="margin-top:20px">
+          <h3>Four kinds of events</h3>
+          <details open><summary>College camps (run by one school)</summary><p>Good when the school is on your list. You get instruction and a look from the coaches you want to see you. They usually cost money, so save them for schools you are really interested in.</p></details>
+          <details><summary>Multi-school camps</summary><p>Coaches from several schools take part, so one event can put you in front of several programs. Check ahead of time which schools will be there.</p></details>
+          <details><summary>Showcases</summary><p>A club or organization invites college coaches to watch players. They are for showing what you can already do, not for learning. Ask the organizer or your coach which college coaches are expected.</p></details>
+          <details><summary>Skills clinics</summary><p>Short sessions focused on a skill like pitching, hitting or catching. Take them to get better, not to be recruited.</p></details>
+        </div>
+
+        <div class="card" style="margin-top:20px">
+          <h3>How to choose which ones to attend</h3>
+          <ol class="steps">
+            <li>Start with your list of schools.</li>
+            <li>Check each school's softball website for a camps page. Note the dates, ages and cost.</li>
+            <li>Ask your club or high school coach which events coaches from your list attend.</li>
+            <li>Check your tournament schedule so nothing conflicts.</li>
+            <li>Email the coach to ask the questions below before you pay.</li>
+            <li>Choose a few events that fit, not all of them.</li>
+          </ol>
+          <p>You do not need to attend many. Not every family can afford several camps, and a few well-chosen events are better than a long list.</p>
+          <h4 class="mini-h" style="margin-top:6px">Questions to ask before you register</h4>
+          <ul>
+            <li>Will the coaching staff evaluate players at this camp?</li>
+            <li>Which session fits my position and graduation year?</li>
+            <li>How many players attend each session?</li>
+            <li>What does the fee cover? Are there lower-cost options?</li>
+          </ul>
+        </div>
+
+        <div class="card" style="margin-top:20px">
+          <h3>Rate a camp before you sign up</h3>
+          <ul class="checklist">
+            <li><label><input type="checkbox"><span>The school is on my list.</span></label></li>
+            <li><label><input type="checkbox"><span>The staff who recruit my position will be there.</span></label></li>
+            <li><label><input type="checkbox"><span>I will be evaluated, not only coached.</span></label></li>
+            <li><label><input type="checkbox"><span>It does not conflict with my club schedule.</span></label></li>
+            <li><label><input type="checkbox"><span>My family can afford it, including travel.</span></label></li>
+          </ul>
+          <p class="muted" style="font-size:0.9rem">If you can check most of these, the camp is worth a serious look.</p>
+        </div>
+
+        <div class="card" style="margin-top:20px">
+          <h3>Before, during and after</h3>
+          <details open><summary>Before</summary><ul>
+            <li>Send a camp question email using the template.</li>
+            <li>Have your video link and schedule ready.</li>
+            <li>Know your position, your strengths and one thing you are working on.</li></ul></details>
+          <details><summary>During</summary><ul>
+            <li>Introduce yourself to the coaches and say what school you are interested in.</li>
+            <li>Show you are coachable: listen, try the adjustment and ask questions.</li>
+            <li>Meet a current player and ask what a normal week looks like.</li></ul></details>
+          <details><summary>After</summary><ul>
+            <li>Send a thank-you email within a few days using the After a camp template.</li>
+            <li>Ask for feedback and what the coach would like to see next.</li>
+            <li>Add the camp and the date to your tracker.</li></ul></details>
+        </div>
+        <p class="src">Source for event types and choosing advice: <a href="https://extrainningsoftball.com/topical-issue-summer-camps-clinics-showcases-what-options-do-players-families-have/" target="_blank" rel="noopener">Extra Inning Softball, summer camps, clinics and showcases</a>. Which events matter most varies by region and by year, so ask your coach for a short list.</p>
       </div>
     </div>
   </div>
@@ -438,6 +644,7 @@ footer p { font-size: 0.92rem; opacity: 0.9; }
       <details open><summary>Start the conversation</summary><ul><li>"What do you love most about softball?"</li><li>"What would you want softball to be in your life in ten years?"</li><li>"What would you like to know that nobody has told you yet?"</li></ul></details>
       <details><summary>Describe pro softball accurately</summary><p>Say that the AUSL is a real league with limited spots, a short season, and public ways in. Share the numbers from the page above and avoid both hype and dismissal. Let the player decide how much it matters to them.</p></details>
       <details><summary>Make room for "I just want to play"</summary><p>Some players want softball in their lives without wanting it as a career. Treat that as a complete answer. Point them to college, club, adult leagues or coaching.</p></details>
+      <details><summary>Be patient with players who know their options but are not ready</summary><p>Some players understand what is out there and still do not want to explore it yet. Check in again later instead of pressing, and let them know the door stays open. Staying in the sports world does not require being the athlete.</p></details>
       <details><summary>Show the paths beside the field</summary><p>Training, rehab, media and coaching are all softball careers. Invite a former player or a local professional to talk to the team for fifteen minutes.</p></details>
       <details><summary>Where to send players next</summary><p>The quiz and pathways map on this page, and the recruiting guide for their age group.</p></details>
     </div>
@@ -448,8 +655,8 @@ footer p { font-size: 0.92rem; opacity: 0.9; }
 <footer>
   <div class="inner">
     <h2>Help test On Deck</h2>
-    <p>This is version 1 of a concept prototype, built to be tried by real players, parents and coaches. It is not affiliated with or endorsed by the AUSL or TOGETHXR. Sample profiles and mentors are placeholders.</p>
-    <div class="test-qs"><span>What helped?</span><span>What confused you?</span><span>What is missing?</span></div>
+    <p>This is version 2 of a concept prototype, built to be tried by real players, parents and coaches. It is not affiliated with or endorsed by the AUSL or TOGETHXR. Sample profiles and mentors are placeholders.</p>
+    <p>Tried it? Tell us what helped, what confused you, and what is missing. Use the feedback form you were sent.</p>
     <p style="font-size:0.8rem;opacity:0.7">Survey figures come from 35 current players, 21 former players and 3 coaches. Responses are self-reported, and the sample skews toward high school age and older.</p>
   </div>
 </footer>
@@ -688,6 +895,107 @@ footer p { font-size: 0.92rem; opacity: 0.9; }
     document.getElementById('guideCount').textContent = n + ' of ' + g.items.length + ' done';
   }
 
+  /* Guide sub-tabs */
+  var GSUBS = [['timeline', 'Timeline'], ['email', 'Email a coach'], ['camps', 'Camps and showcases'], ['basics', 'Recruiting basics']];
+  var gsub = 'timeline';
+  function renderSubs() {
+    var wrap = document.getElementById('guideSubTabs');
+    wrap.innerHTML = '';
+    GSUBS.forEach(function (s) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'chip'; b.textContent = s[1];
+      b.setAttribute('aria-pressed', s[0] === gsub ? 'true' : 'false');
+      b.addEventListener('click', function () { gsub = s[0]; renderSubs(); });
+      wrap.appendChild(b);
+    });
+    var panes = document.querySelectorAll('#guide [data-sub]');
+    for (var i = 0; i < panes.length; i++) { panes[i].hidden = panes[i].getAttribute('data-sub') !== gsub; }
+  }
+
+  /* Email builder: nothing is stored or sent */
+  var ETYPES = [['first', 'First email'], ['camp', 'Ask about a camp'], ['thanks', 'After a camp'], ['update', 'Update']];
+  var etype = 'first';
+  function fv(id, ph) {
+    var el = document.getElementById(id);
+    var v = el ? el.value.trim() : '';
+    return v || '[' + ph + ']';
+  }
+  function buildEmail() {
+    var name = fv('eName', 'Your name'), year = fv('eYear', 'Grad year'), pos = fv('ePos', 'Position'),
+        hs = fv('eHS', 'High school'), club = fv('eClub', 'Club team'), gpa = fv('eGPA', 'GPA'),
+        school = fv('eSchool', 'College'), coach = fv('eCoach', 'Last name'), video = fv('eVideo', 'Link to your video'),
+        camp = fv('eCamp', 'Camp name and date'), why = fv('eWhy', 'one real reason you like the program'),
+        note = fv('eNote', 'something specific');
+    var ev = document.getElementById('eEvents').value.trim();
+    var events = ev ? 'I will be playing at ' + ev + '.' : '[Add your upcoming events, with dates and field locations.]';
+    var sig = name + '\n' + year + ' ' + pos + ', ' + hs + ' and ' + club;
+    var s, b;
+    if (etype === 'camp') {
+      s = year + ' ' + pos + ', ' + name + ', question about ' + camp;
+      b = ['Hi Coach ' + coach + ',', '',
+        'My name is ' + name + '. I am a ' + year + ' ' + pos + ' at ' + hs + ' and I play club for ' + club + '. I am interested in ' + school + ' and I would like to attend ' + camp + '.', '',
+        'Could you tell me whether the coaching staff evaluates players at this camp, which session fits my position and graduation year, and what the fee covers?', '',
+        'My GPA is ' + gpa + '. Here is my skills video: ' + video, '',
+        'Thank you for your time,', sig].join('\n');
+    } else if (etype === 'thanks') {
+      s = 'Thank you from ' + name + ', ' + year + ' ' + pos;
+      b = ['Hi Coach ' + coach + ',', '',
+        'Thank you for the chance to attend ' + camp + '. One thing I took away from camp: ' + note + '. I also enjoyed meeting the staff and the players.', '',
+        'I am still very interested in ' + school + '. Is there anything you would like me to work on? I would be glad to send an updated video or my schedule. ' + events, '',
+        'Thank you again,', sig].join('\n');
+    } else if (etype === 'update') {
+      s = 'Update from ' + name + ', ' + year + ' ' + pos;
+      b = ['Hi Coach ' + coach + ',', '',
+        'I wanted to share an update since I last wrote. ' + note + '.', '',
+        'Here is my newest video: ' + video + ' ' + events, '',
+        'I am still very interested in ' + school + '. Thank you for your time.', '',
+        sig].join('\n');
+    } else {
+      s = year + ' ' + pos + ', ' + name + ', interested in ' + school + ' softball';
+      b = ['Hi Coach ' + coach + ',', '',
+        'My name is ' + name + '. I am a ' + year + ' ' + pos + ' at ' + hs + ' and I play club for ' + club + '. I am writing because I am very interested in ' + school + '\'s softball program, especially because ' + why + '.', '',
+        'My GPA is ' + gpa + '. Here is my skills video: ' + video, '',
+        events + ' If your schedule allows, I would love for you to see me play.', '',
+        'I would also appreciate any feedback on my video, and to hear whether you are recruiting my graduation year and position.', '',
+        'Thank you for your time,', sig].join('\n');
+    }
+    return { subject: s, body: b };
+  }
+  function updateEmail() {
+    var m = buildEmail();
+    document.getElementById('emailSubject').textContent = m.subject;
+    document.getElementById('emailBody').textContent = m.body;
+  }
+  function renderEmailTabs() {
+    var wrap = document.getElementById('emailType');
+    wrap.innerHTML = '';
+    ETYPES.forEach(function (t) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'chip'; b.textContent = t[1];
+      b.setAttribute('aria-pressed', t[0] === etype ? 'true' : 'false');
+      b.addEventListener('click', function () { etype = t[0]; renderEmailTabs(); updateEmail(); });
+      wrap.appendChild(b);
+    });
+  }
+  ['eName', 'eYear', 'ePos', 'eHS', 'eClub', 'eGPA', 'eSchool', 'eCoach', 'eVideo', 'eCamp', 'eEvents', 'eWhy', 'eNote'].forEach(function (id) {
+    document.getElementById(id).addEventListener('input', updateEmail);
+  });
+  document.getElementById('copyEmail').addEventListener('click', function () {
+    var text = 'Subject: ' + document.getElementById('emailSubject').textContent + '\n\n' + document.getElementById('emailBody').textContent;
+    var msg = document.getElementById('copyMsg');
+    function fallback() {
+      var r = document.createRange();
+      r.selectNodeContents(document.getElementById('emailBody'));
+      var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+      msg.textContent = 'Press Ctrl+C (Cmd+C on a Mac) to copy the selected email.';
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () {
+        msg.textContent = 'Copied. Add the coach\'s email address and have a parent read it before you send.';
+      }, fallback);
+    } else { fallback(); }
+  });
+
   /* Tab routing: each section is its own page, chosen by the URL hash */
   var PAGES = ['home', 'quiz', 'pathways', 'numbers', 'spotlights', 'mentors', 'guide', 'coaches'];
   function showPage() {
@@ -704,8 +1012,6 @@ footer p { font-size: 0.92rem; opacity: 0.9; }
   }
   window.addEventListener('hashchange', showPage);
 
-  renderTabs(); renderPanel(); resetQuiz(); renderMentors(); renderGuide(); showPage();
+  renderTabs(); renderPanel(); resetQuiz(); renderMentors(); renderGuide(); renderSubs(); renderEmailTabs(); updateEmail(); showPage();
 })();
 </script>
-
-</body></html>
