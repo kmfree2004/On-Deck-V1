@@ -1,0 +1,1885 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>On Deck</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Big+Shoulders+Display:wght@700;800;900&display=swap">
+<style>
+/* Layout concept: a dugout lineup card. Dark field-green hero, then chalk-white sections built as tab list + detail panel. Boldness lives in the giant condensed type and the softball; everything else stays quiet. */
+:root {
+  --bg: #F2F4EE;
+  --surface: #FFFFFF;
+  --soft: #E6EBE1;
+  --ink: #0F2A22;
+  --muted: #4A5E56;
+  --line: #C9D2C6;
+  --field: #12392C;
+  --on-field: #F2F4EE;
+  --ball: #D9EF3B;
+  --on-ball: #0F2A22;
+  --seam: #D13A2F;
+  --seam-text: #B3261B;
+  --font-display: 'Big Shoulders Display', 'Arial Narrow', Impact, sans-serif;
+  --font-body: 'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0B1713; --surface: #122520; --soft: #183029; --ink: #EAF0E6; --muted: #A3B5AB;
+    --line: #27403A; --field: #0F2F24; --on-field: #EAF0E6; --ball: #D9EF3B; --on-ball: #0F2A22;
+    --seam: #E8493D; --seam-text: #FF8479; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0B1713; --surface: #122520; --soft: #183029; --ink: #EAF0E6; --muted: #A3B5AB;
+  --line: #27403A; --field: #0F2F24; --on-field: #EAF0E6; --ball: #D9EF3B; --on-ball: #0F2A22;
+  --seam: #E8493D; --seam-text: #FF8479; color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.55; }
+h1, h2, h3, h4 { font-family: var(--font-display); text-transform: uppercase; line-height: 0.95; margin: 0; text-wrap: balance; letter-spacing: 0.01em; }
+p { margin: 0; max-width: 65ch; }
+ul { margin: 0; padding-left: 1.1em; }
+li + li { margin-top: 0.4em; }
+a { color: inherit; }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 3px solid var(--seam-text); outline-offset: 2px; }
+.hero :focus-visible { outline-color: var(--ball); }
+
+.inner {
+  width: 100%; max-width: 1120px; margin-inline: auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.label { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--seam-text); }
+.muted { color: var(--muted); }
+.badge { display: inline-block; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.2em 0.6em; border-radius: 99px; background: var(--soft); color: var(--muted); border: 1px solid var(--line); }
+.btn { display: inline-flex; align-items: center; gap: 0.5em; padding: 0.8em 1.3em; border-radius: 6px; font-weight: 700; text-decoration: none; border: 2px solid transparent; transition: transform .15s ease; }
+.btn:hover { transform: translateY(-2px); }
+.btn-ball { background: var(--ball); color: var(--on-ball); }
+.btn-line { border-color: var(--on-field); color: var(--on-field); }
+.btn-solid { background: var(--ink); color: var(--bg); }
+.btn-out { border-color: var(--ink); background: transparent; }
+
+/* Hero */
+.hero { background: var(--field); color: var(--on-field); }
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 18px; flex-wrap: wrap; }
+.wordmark { font-family: var(--font-display); font-weight: 900; font-size: 1.6rem; letter-spacing: 0.04em; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; }
+.wordmark svg { width: 26px; height: 26px; }
+.hero-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 32px; align-items: center; padding-block: 36px 56px; }
+.hero h1 { font-weight: 900; font-size: clamp(3.4rem, 10vw, 7.6rem); line-height: 0.86; margin-block: 14px 22px; }
+.hero h1 mark { background: var(--ball); color: var(--on-ball); padding: 0 0.12em; }
+.hero .label { color: var(--ball); }
+.hero p.lede { font-size: 1.15rem; max-width: 52ch; opacity: 0.92; }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+.ball { width: 100%; max-width: 340px; justify-self: center; }
+.ball .b-fill { fill: var(--ball); }
+.ball .b-seam { stroke: var(--seam); fill: none; }
+.ball .b-ring { stroke: var(--on-field); fill: none; opacity: 0.45; }
+.strip { border-top: 1px solid rgba(242, 244, 238, 0.22); }
+.strip .inner { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; padding-block: 22px; }
+.strip p { font-size: 0.92rem; opacity: 0.9; }
+.strip b { font-family: var(--font-display); font-size: 1.9rem; font-weight: 800; color: var(--ball); display: block; line-height: 1; margin-bottom: 4px; }
+
+
+/* About (home) */
+.about { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 40px; align-items: start; }
+.about .sec-head { margin-bottom: 0; }
+.about-text { display: grid; gap: 16px; font-size: 1.1rem; }
+.about-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; margin-top: 40px; padding-top: 28px; border-top: 1px solid var(--line); }
+.about-stats p { font-size: 0.95rem; color: var(--muted); }
+.about-stats b { font-family: var(--font-display); font-size: 2.6rem; font-weight: 800; line-height: 1; display: block; margin-bottom: 4px; color: var(--ink); text-transform: uppercase; }
+#about .hero-actions { margin-top: 28px; }
+@media (max-width: 860px) {
+  .about, .about-stats { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+}
+
+[hidden] { display: none !important; }
+body { margin: 0; }
+
+/* Guide: email builder */
+.form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.field { display: grid; gap: 4px; font-size: 0.85rem; font-weight: 600; min-width: 0; }
+.field.wide { grid-column: 1 / -1; }
+.field input { font: inherit; font-weight: 400; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; width: 100%; min-width: 0; }
+.draft-wrap { display: grid; gap: 6px; }
+.draft { white-space: pre-wrap; overflow-wrap: anywhere; background: var(--soft); border-radius: 8px; padding: 14px 16px; font-size: 0.95rem; line-height: 1.6; }
+.draft-subject { font-weight: 600; }
+.copy-row { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+ol.steps { margin: 0; padding-left: 1.3em; display: grid; gap: 8px; }
+ol.steps li + li { margin-top: 0; }
+.table-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 0.9rem; min-width: 560px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+th { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--seam-text); }
+@media (max-width: 560px) { .form-grid { grid-template-columns: minmax(0, 1fr); } }
+
+/* Sections */
+section.block { padding-block: 72px; }
+section.alt { background: var(--soft); }
+.sec-head { display: grid; gap: 10px; margin-bottom: 32px; }
+.sec-head h2 { font-size: clamp(2.2rem, 6vw, 3.8rem); font-weight: 800; }
+.sec-head p { color: var(--muted); font-size: 1.05rem; }
+
+/* Pathways */
+.path-layout { display: grid; grid-template-columns: minmax(0, 260px) minmax(0, 1fr); gap: 24px; align-items: start; }
+.path-tabs { display: grid; gap: 8px; }
+.path-tab { text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; display: grid; gap: 2px; }
+.path-tab strong { font-family: var(--font-display); text-transform: uppercase; font-size: 1.25rem; font-weight: 800; letter-spacing: 0.02em; }
+.path-tab span { font-size: 0.8rem; color: var(--muted); }
+.path-tab[aria-pressed="true"] { background: var(--ball); border-color: var(--ball); color: var(--on-ball); }
+.path-tab[aria-pressed="true"] span { color: var(--on-ball); }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: clamp(18px, 4vw, 32px); display: grid; gap: 22px; min-width: 0; }
+.panel h3 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 900; }
+.two-col { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+.two-col h4, .mini-h { font-family: var(--font-body); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.14em; color: var(--seam-text); margin-bottom: 10px; text-transform: uppercase; }
+.try { background: var(--soft); border-radius: 8px; padding: 14px 16px; }
+.survey-note { border-top: 1px solid var(--line); padding-top: 16px; font-size: 0.92rem; color: var(--muted); }
+.survey-note b { color: var(--ink); }
+
+.chart { margin-top: 40px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: clamp(18px, 4vw, 28px); display: grid; gap: 16px; }
+.chart h3 { font-size: 1.7rem; font-weight: 800; }
+.bars { display: grid; gap: 10px; }
+.bar-row { display: grid; grid-template-columns: minmax(120px, 210px) minmax(0, 1fr) 76px; gap: 12px; align-items: center; font-size: 0.92rem; }
+.bar-track { height: 18px; background: var(--soft); border-radius: 3px; overflow: hidden; }
+.bar-fill { height: 100%; background: var(--ink); border-radius: 3px; }
+.bar-fill.pro { background: var(--seam); }
+.bar-row .val { font-variant-numeric: tabular-nums; text-align: right; color: var(--muted); }
+
+/* Quiz */
+.quiz { background: var(--field); color: var(--on-field); border-radius: 12px; padding: clamp(20px, 5vw, 40px); display: grid; gap: 22px; min-height: 380px; align-content: start; }
+.quiz .label { color: var(--ball); }
+.quiz h3 { font-size: clamp(1.8rem, 5vw, 2.8rem); font-weight: 800; line-height: 1; }
+.quiz-progress { height: 6px; background: rgba(242, 244, 238, 0.2); border-radius: 99px; overflow: hidden; }
+.quiz-progress i { display: block; height: 100%; background: var(--ball); width: 0; transition: width .3s ease; }
+.opts { display: grid; gap: 10px; }
+.opt { text-align: left; background: transparent; border: 2px solid rgba(242, 244, 238, 0.4); color: var(--on-field); padding: 14px 16px; border-radius: 8px; font-weight: 500; }
+.opt:hover { border-color: var(--ball); background: rgba(217, 239, 59, 0.1); }
+.result-bars { display: grid; gap: 8px; max-width: 520px; }
+.result-bars .bar-row { grid-template-columns: 130px minmax(0, 1fr); font-size: 0.85rem; }
+.result-bars .bar-track { background: rgba(242, 244, 238, 0.2); }
+.result-bars .bar-fill { background: var(--ball); }
+.quiz-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+
+/* Numbers */
+.num-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: clamp(18px, 3vw, 26px); display: grid; gap: 14px; align-content: start; min-width: 0; }
+.card h3 { font-size: 1.7rem; font-weight: 800; }
+.facts { list-style: none; padding: 0; display: grid; gap: 12px; }
+.facts li { margin: 0; display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); gap: 12px; align-items: baseline; }
+.facts b { font-family: var(--font-display); font-size: 1.5rem; font-weight: 800; line-height: 1; text-transform: uppercase; }
+.todo li { color: var(--muted); }
+.entry-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 24px; }
+.entry-grid .card { gap: 8px; }
+.entry-grid h4 { font-size: 1.35rem; font-weight: 800; }
+.entry-grid p { font-size: 0.92rem; color: var(--muted); }
+.src { margin-top: 18px; font-size: 0.85rem; color: var(--muted); }
+
+/* Spotlights, mentors */
+.card-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.profile dl { margin: 0; display: grid; gap: 10px; }
+.profile dt { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--seam-text); }
+.profile dd { margin: 2px 0 0; color: var(--muted); font-style: italic; font-size: 0.92rem; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+.chip { background: var(--surface); border: 1px solid var(--line); border-radius: 99px; padding: 8px 16px; font-weight: 600; font-size: 0.9rem; }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.note { margin-top: 18px; font-size: 0.9rem; color: var(--muted); }
+
+/* Guide */
+.tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+.checklist { list-style: none; padding: 0; display: grid; gap: 10px; }
+.checklist li { margin: 0; }
+.checklist label { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 12px; align-items: start; cursor: pointer; }
+.checklist input { width: 20px; height: 20px; margin: 2px 0 0; accent-color: var(--ink); }
+.checklist input:checked + span { color: var(--muted); text-decoration: line-through; }
+.callout { background: var(--soft); border-radius: 8px; padding: 14px 16px; font-size: 0.92rem; }
+
+details { border-top: 1px solid var(--line); padding-block: 14px; }
+details:last-of-type { border-bottom: 1px solid var(--line); }
+summary { font-weight: 700; cursor: pointer; font-size: 1.05rem; }
+details > :not(summary) { margin-top: 10px; color: var(--muted); }
+details ul { color: var(--muted); }
+.two-up { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px; align-items: start; }
+
+footer { background: var(--field); color: var(--on-field); padding-block: 48px; }
+footer .inner { display: grid; gap: 16px; }
+footer h2 { font-size: 2.4rem; font-weight: 900; }
+footer p { font-size: 0.92rem; opacity: 0.9; }
+.test-qs { display: flex; gap: 12px; flex-wrap: wrap; }
+.test-qs span { border: 1px solid rgba(242, 244, 238, 0.4); border-radius: 99px; padding: 6px 14px; font-size: 0.9rem; }
+
+@media (max-width: 860px) {
+  .hero-grid, .path-layout, .num-grid, .two-up { grid-template-columns: minmax(0, 1fr); }
+  .ball { max-width: 220px; justify-self: start; }
+  .path-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .card-grid, .entry-grid { grid-template-columns: minmax(0, 1fr); }
+  .strip .inner { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+}
+@media (max-width: 560px) {
+  .two-col { grid-template-columns: minmax(0, 1fr); }
+  .bar-row { grid-template-columns: minmax(0, 1fr) 64px; }
+  .bar-row .bar-track { grid-column: 1 / -1; grid-row: 2; }
+  .bar-row .val { grid-row: 1; grid-column: 2; }
+  .result-bars .bar-row { grid-template-columns: 110px minmax(0, 1fr); }
+  .result-bars .bar-row .bar-track { grid-column: auto; grid-row: auto; }
+  .facts li { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn, .quiz-progress i { transition: none; }
+  .btn:hover { transform: none; }
+}
+
+/* V3: grouped menus */
+.topbar { position: relative; }
+.gnav { display: flex; gap: 4px 22px; flex-wrap: wrap; align-items: center; font-size: 0.92rem; }
+.gl, .gb { color: var(--on-field); background: none; border: 0; padding: 8px 2px; font: inherit; font-weight: 600; text-decoration: none; opacity: 0.88; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; border-radius: 0; }
+.gl:hover, .gb:hover { opacity: 1; }
+.gb::after { content: ""; width: 6px; height: 6px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg) translateY(-2px); transition: transform .15s ease; }
+.gb[aria-expanded="true"]::after { transform: rotate(-135deg) translate(-1px, -1px); }
+.gl[aria-current="page"], .gb[data-current="true"] { opacity: 1; color: var(--ball); box-shadow: inset 0 -2px 0 var(--ball); }
+.gl:focus-visible, .gb:focus-visible { outline: 3px solid var(--ball); outline-offset: 2px; }
+.gm { position: relative; }
+.gp { position: absolute; top: calc(100% + 6px); left: 0; min-width: 210px; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 6px; display: grid; gap: 2px; z-index: 30; box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28); }
+.gp a { color: var(--ink); text-decoration: none; padding: 10px 12px; border-radius: 6px; font-weight: 600; }
+.gp a:hover { background: var(--soft); }
+.gp a[aria-current="page"] { background: var(--ball); color: var(--on-ball); }
+.gp a:focus-visible { outline: 3px solid var(--seam-text); outline-offset: -2px; }
+@media (max-width: 700px) {
+  .gm { position: static; }
+  .gp { left: max(16px, env(safe-area-inset-left, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); top: 100%; }
+}
+
+/* V3: spotlights */
+.spot h3 { font-size: 1.7rem; font-weight: 800; }
+.spot .quote { font-style: italic; color: var(--muted); }
+.spot .q { font-weight: 700; margin-top: 2px; }
+.spot .a { color: var(--muted); font-style: italic; margin-top: 4px; }
+.qall { margin-top: 28px; max-width: 760px; }
+.qgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 12px; }
+.qgrid ul { color: var(--muted); }
+@media (max-width: 560px) { .qgrid { grid-template-columns: minmax(0, 1fr); } }
+
+/* V3: plain lists and My plan */
+ul.plain { display: grid; gap: 10px; padding-left: 1.2em; margin: 0; }
+ul.plain li + li { margin-top: 0; }
+.progress { height: 8px; background: var(--soft); border-radius: 99px; overflow: hidden; }
+.progress i { display: block; height: 100%; width: 0; background: var(--ink); transition: width .25s ease; }
+.plan-bar { margin-bottom: 20px; }
+.plan-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.filebtn { position: relative; cursor: pointer; }
+.filebtn input { position: absolute; inset: 0; opacity: 0; width: 100%; cursor: pointer; }
+.filebtn:focus-within { outline: 3px solid var(--seam-text); outline-offset: 2px; }
+.confirm { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; background: var(--soft); border-radius: 8px; padding: 12px 14px; }
+.btn.small { padding: 0.5em 0.95em; font-size: 0.9rem; }
+.row-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.saved-list { display: grid; gap: 12px; max-width: 780px; }
+.saved-list h4 { font-family: var(--font-body); font-size: 1.05rem; text-transform: none; line-height: 1.3; letter-spacing: 0; }
+.tr-in { font: inherit; font-size: 0.9rem; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 7px 8px; width: 100%; min-width: 120px; }
+.plan-table { min-width: 900px; }
+.plan-table td { vertical-align: top; }
+.table-wrap { position: relative; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* V4 */
+.sel { font: inherit; font-weight: 400; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; width: 100%; min-width: 0; }
+.picker { display: grid; gap: 14px; margin-bottom: 22px; max-width: 760px; }
+.picker .field { max-width: 640px; }
+.plan-rows { display: grid; gap: 12px; }
+.plan-row { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 6px 16px; align-items: center; }
+.plan-row .btn { text-align: center; }
+.plan-row p { margin: 0; font-size: 0.92rem; color: var(--muted); }
+@media (max-width: 620px) { .plan-row { grid-template-columns: minmax(0, 1fr); } }
+.steps { display: grid; gap: 14px; counter-reset: st; padding: 0; margin: 0; list-style: none; }
+.steps li { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 14px; align-items: start; margin: 0; }
+.steps li::before { counter-increment: st; content: counter(st); display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: var(--ball); color: var(--on-ball); font-weight: 800; font-family: var(--font-display); font-size: 1.2rem; }
+.steps b { display: block; }
+.steps span { color: var(--muted); }
+.two-up { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+@media (max-width: 700px) { .two-up { grid-template-columns: minmax(0, 1fr); } }
+.link-card h4 { font-family: var(--font-body); font-size: 1.15rem; text-transform: none; letter-spacing: 0; line-height: 1.25; }
+.link-card .btn { justify-self: start; }
+.tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 900px) { .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .tiles { grid-template-columns: minmax(0, 1fr); } }
+.tile { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; display: grid; min-width: 0; }
+.tile .ph { aspect-ratio: 4 / 3; max-width: 100%; background: var(--field); color: var(--on-field); display: grid; place-items: center; text-align: center; padding: 12px; font-family: var(--font-display); font-weight: 800; text-transform: uppercase; font-size: 1.5rem; line-height: 1; border-bottom: 3px dashed var(--ball); }
+.tile img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; }
+.tile .cap { padding: 12px 14px 14px; display: grid; gap: 6px; }
+.tile .cap p { margin: 0; }
+.notecard { display: grid; gap: 12px; }
+.notecard .form-grid { gap: 10px; }
+.field textarea { font: inherit; font-weight: 400; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; width: 100%; min-width: 0; resize: vertical; }
+.field select { font: inherit; font-weight: 400; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; width: 100%; min-width: 0; }
+.support { border-left: 4px solid var(--ball); }
+</style>
+
+<header class="hero">
+  <div class="inner topbar">
+    <a class="wordmark" href="#home">
+      <svg viewBox="0 0 300 300" aria-hidden="true"><circle cx="150" cy="150" r="140" class="b-fill" style="fill:var(--ball)"/></svg>
+      ON DECK
+    </a>
+    <nav class="gnav" id="gnav" aria-label="Main">
+      <a class="gl" href="#home">Home</a>
+      <div class="gm">
+        <button type="button" class="gb" aria-expanded="false" aria-controls="gp-explore">Explore</button>
+        <div class="gp" id="gp-explore" hidden>
+          <a href="#quiz">Find your path</a>
+          <a href="#pathways">Pathways</a>
+          <a href="#spark">Find the spark</a>
+        </div>
+      </div>
+      <div class="gm">
+        <button type="button" class="gb" aria-expanded="false" aria-controls="gp-talk">Real talk</button>
+        <div class="gp" id="gp-talk" hidden>
+          <a href="#numbers">Real numbers</a>
+          <a href="#spotlights">Spotlights</a>
+          <a href="#mentors">Mentors</a>
+        </div>
+      </div>
+      <div class="gm">
+        <button type="button" class="gb" aria-expanded="false" aria-controls="gp-recruit">Get recruited</button>
+        <div class="gp" id="gp-recruit" hidden>
+          <a href="#guide">Guide</a>
+          <a href="#plan">My plan</a>
+          <a href="#compete">Find a travel team</a>
+          <a href="#resources">Resources</a>
+        </div>
+      </div>
+      <a class="gl" href="#dugout">The Dugout</a>
+      <a class="gl" href="#coaches">For coaches</a>
+    </nav>
+  </div>
+  <div class="inner hero-grid page" data-page="home">
+    <div>
+      <span class="label">A home for young softball players</span>
+      <h1>Your future in softball is <mark>on deck.</mark></h1>
+      <p class="lede">Pro, college, coaching, training, media, or playing for the love of it. See the real paths, hear from people on them, and decide what fits you.</p>
+      <div class="hero-actions">
+        <a class="btn btn-ball" href="#quiz">Find your path</a>
+        <a class="btn btn-line" href="#numbers">See the real numbers</a>
+      </div>
+    </div>
+    <svg class="ball" viewBox="0 0 240 240" role="img" aria-label="On Deck stitched round badge">
+      <circle cx="120" cy="120" r="108" style="fill:var(--field);stroke:var(--on-field);stroke-width:5"/>
+      <circle cx="120" cy="120" r="92" fill="none" style="stroke:var(--ball);stroke-width:4" stroke-dasharray="10 8"/>
+      <text x="120" y="118" text-anchor="middle" font-size="68" style="fill:var(--ball);font-family:'Big Shoulders Display','Arial Narrow',Impact,sans-serif;font-weight:900">ON</text>
+      <text x="120" y="178" text-anchor="middle" font-size="68" style="fill:var(--on-field);font-family:'Big Shoulders Display','Arial Narrow',Impact,sans-serif;font-weight:900">DECK</text>
+    </svg>
+  </div>
+</header>
+
+<main>
+<!-- ABOUT (home) -->
+<section class="block page" data-page="home" id="about">
+  <div class="inner">
+    <div class="about">
+      <div class="sec-head">
+        <span class="label">About On Deck</span>
+        <h2>Helping players find the future that fits them</h2>
+      </div>
+      <div class="about-text">
+        <p>On Deck helps young softball players see everything softball can lead to and find the future that is right for them. That might be playing in college, going pro with the AUSL, coaching, training or healing athletes, working in sports media, or playing for the love of it.</p>
+        <p>We share the real paths, honest numbers and people who have walked them, so players can choose with good information. Where a player lands is her decision, and "softball is just for fun" is a good answer.</p>
+        <p>We started by asking players. Some former players told us they wished they had known more about their options, and most said pro softball did not feel realistic. Almost all said they played for the love of the game.</p>
+      </div>
+    </div>
+    <div class="about-stats">
+      <p><b>19 of 21</b>former players played for the love of the game.</p>
+      <p><b>13 of 21</b>former players said pro softball did not feel realistic.</p>
+      <p><b>1 of 35</b>current players picked pro softball as the future they are most interested in.</p>
+    </div>
+    <p class="src">On Deck survey of 35 current players, 21 former players and 3 coaches. Responses are self-reported and the sample is small.</p>
+    <div class="hero-actions">
+      <a class="btn btn-solid" href="#quiz">Find your path</a>
+      <a class="btn btn-out" href="#pathways">Explore the pathways</a>
+    </div>
+  </div>
+</section>
+
+<!-- QUIZ -->
+<section class="block page" id="quiz" data-page="quiz" hidden>
+  <div class="inner">
+    <div class="sec-head">
+      <span class="label">Quick quiz</span>
+      <h2>Which future fits you right now?</h2>
+      <p>Six questions, about a minute. Your answers are not saved or sent anywhere. Treat the result as a conversation starter, since your answers will change as you grow.</p>
+    </div>
+    <div class="quiz" id="quizBox" aria-live="polite"></div>
+  </div>
+</section>
+
+<!-- PATHWAYS -->
+<section class="block page" id="pathways" data-page="pathways" hidden>
+  <div class="inner">
+    <div class="sec-head">
+      <span class="label">Pathways map</span>
+      <h2>Six ways softball can stay in your life</h2>
+      <p>Pick a path to see what it looks like, what it takes, and what players in our survey said about it. Paths overlap. Plenty of people play in college, coach, and keep playing in an adult league.</p>
+    </div>
+    <div class="path-layout">
+      <div class="path-tabs" id="pathTabs"></div>
+      <div class="panel" id="pathPanel" aria-live="polite"></div>
+    </div>
+  </div>
+</section>
+
+<!-- NUMBERS -->
+<section class="block page" id="numbers" data-page="numbers" hidden>
+  <div class="inner">
+    <div class="sec-head">
+      <span class="label">Real numbers</span>
+      <h2>The honest version of pro softball</h2>
+      <p>Players told us pro softball did not feel realistic or did not pay enough. Hype does not help with either. Here is what is public today, and what we still need to confirm with the league.</p>
+    </div>
+    <div class="num-grid">
+      <div class="card">
+        <h3>What is public today</h3>
+        <ul class="facts">
+          <li><b>6 teams</b><span>Bandits, Blaze, Talons, Volts, Spark and Cascade. Spark and Cascade joined as expansion teams for 2026.</span></li>
+          <li><b>25 games</b><span>Each team played 25 games from June 9 to July 20, 2026.</span></li>
+          <li><b>17 tickets</b><span>The May 4, 2026 College Draft placed 17 players who received a "Golden Ticket."</span></li>
+          <li><b>On ESPN</b><span>ESPN is a broadcast partner, and Major League Baseball made a strategic investment in the league.</span></li>
+          <li><b>98%</b><span>of NCAA student-athletes go pro in something other than sports, according to the NCAA.</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Still to confirm with the AUSL</h3>
+        <ul class="todo">
+          <li>Pay and benefits for players, by season and role</li>
+          <li>Roster size and how many new spots open each year</li>
+          <li>Softball-specific odds of moving from high school to college to pro</li>
+          <li>How the Reserve Athlete Pool is chosen</li>
+          <li>How players outside college can opt in</li>
+          <li>What a player's year looks like outside June and July</li>
+          <li>Guidelines for youth events and for contact with minors</li>
+        </ul>
+        <p class="muted" style="font-size:0.9rem">We will publish these only after the league confirms them.</p>
+      </div>
+    </div>
+    <div class="entry-grid">
+      <div class="card"><span class="label">Way in</span><h4>College Draft</h4><p>College players who receive a Golden Ticket are drafted each spring and assigned to a team.</p></div>
+      <div class="card"><span class="label">Way in</span><h4>Allocation Draft</h4><p>Players who opt in can be chosen, including players from the Reserve Athlete Pool and from other pro leagues.</p></div>
+      <div class="card"><span class="label">Way in</span><h4>Expansion Draft</h4><p>New teams can select players the original teams did not protect. This only happens when the league adds teams.</p></div>
+    </div>
+    <p class="src">Sources: <a href="https://en.wikipedia.org/wiki/2026_AUSL_season" target="_blank" rel="noopener">2026 AUSL season (Wikipedia)</a>, <a href="https://www.mlb.com/news/athletes-unlimited-softball-league-airs-college-draft-monday" target="_blank" rel="noopener">What to know about 2026 AUSL College Draft (MLB.com)</a>, <a href="https://theausl.com/news/2025-ausl-draft-results-by-round/" target="_blank" rel="noopener">2025 AUSL Draft results (theausl.com)</a>, and <a href="https://www.ncaa.org/sports/2024/4/15/softball-probability-of-competing-beyond-high-school.aspx" target="_blank" rel="noopener">NCAA student-athlete statistics</a>. League details change, so check theausl.com for current information.</p>
+  </div>
+</section>
+
+<!-- SPOTLIGHTS -->
+<section class="block page" id="spotlights" data-page="spotlights" hidden>
+  <div class="inner">
+    <div class="sec-head">
+      <span class="label">Spotlights</span>
+      <h2>How they got here, in their own words</h2>
+      <p>Pick who you want to hear from, then pick a question. You will see every person's answer to it. Pro players, college players and coaches are all here, because each one is proof of a different path. The cards show the layout. Real profiles will come from interviews with people who agree to be featured.</p>
+    </div>
+    <div class="picker">
+      <div class="chips" id="spotWho" role="group" aria-label="Who do you want to hear from?" style="margin:0"></div>
+      <label class="field" for="spotSel">Question
+        <select id="spotSel" class="sel"></select>
+      </label>
+    </div>
+    <div class="card-grid" id="spotGrid"></div>
+    <p class="note">Sample layout only. No real people are shown yet.</p>
+  </div>
+</section>
+
+<!-- MENTORS -->
+<section class="block page" id="mentors" data-page="mentors" hidden>
+  <div class="inner">
+    <div class="sec-head">
+      <span class="label">Mentor matching</span>
+      <h2>Talk to someone who has done it</h2>
+      <p>In our survey, 16 of 21 former players said coaches gave them the most help with what comes after softball, and 5 named former players. Mentors can add voices from paths a coach may not have walked.</p>
+    </div>
+    <div class="chips" id="mentorChips" role="group" aria-label="Filter mentors by interest"></div>
+    <div class="card-grid" id="mentorGrid"></div>
+    <p class="note">Sample mentors only. In the next version, mentors will be real volunteers, screened with a partner organization, and younger players will only message through a parent or guardian.</p>
+    <div class="card" style="margin-top:24px;max-width:720px">
+      <div><span class="badge">Not live yet</span></div>
+      <h3>How mentor matching will work</h3>
+      <ul class="todo">
+        <li>A player picks a path and writes what she wants to ask. If she is under 18, a parent or guardian helps.</li>
+        <li>On Deck matches her with a screened volunteer mentor who has walked that path.</li>
+        <li>First contact goes through a parent or guardian or through On Deck, never directly with the player.</li>
+        <li>They schedule one short call or video chat.</li>
+      </ul>
+      <p class="muted" style="font-size:0.9rem">This prototype does not collect names or contact details.</p>
+    </div>
+  </div>
+</section>
+
+<!-- GUIDE -->
+<section class="block page" id="guide" data-page="guide" hidden>
+  <div class="inner">
+    <div class="sec-head">
+      <span class="label">Recruiting and showcase guide</span>
+      <h2>What to do at your age, in plain steps</h2>
+      <p>Age-by-age steps, email templates and camp advice for players and parents. Rules and dates change, so confirm details with the NCAA, your coach, and any program you talk to. New here? Start with the Start here tab.</p>
+    </div>
+    <div class="tabs" id="guideSubTabs" role="group" aria-label="Guide sections" style="margin-bottom:24px"></div>
+    <div style="max-width:780px">
+      <div data-sub="start">
+        <div class="card">
+          <span class="label">Start here</span>
+          <h3>How the Get recruited section works</h3>
+          <p>Recruiting is a lot of small steps over several years. This section breaks them up so you always know what to do next. There are two parts: one to read, one to use.</p>
+          <ol class="steps">
+            <li><div><b>Read the Guide</b><span>Pick your age on the Timeline tab to see what to do now. The other tabs cover how to write to a coach, how to choose camps and showcases, and how recruiting works. Nothing here is saved. It is just for reading.</span></div></li>
+            <li><div><b>Do the steps in My plan</b><span>My plan is where you act. Fill in your profile once, then use it to build emails to coaches, tick off your checklist, track every school, and write notes after camps and visits.</span></div></li>
+            <li><div><b>Find where else to look</b><span>Resources has the official NCAA registration page and recruiting platforms such as FieldLevel. Find a travel team helps if you want to play at a more competitive level first.</span></div></li>
+          </ol>
+        </div>
+        <div class="card" style="margin-top:16px">
+          <h3>Where does my information go?</h3>
+          <p>Nowhere. My plan saves in this web browser, on this device only. There are no accounts and On Deck never receives your information. The catch is that your browser can lose it if you clear your browsing data, use a private window, or switch to another phone or computer. That is what <b>Download my data</b> and <b>Load saved data</b> are for. Download makes a backup file, and Load puts it back later. My plan explains both in detail.</p>
+          <div class="row-actions">
+            <a class="btn btn-solid small" href="#plan">Open My plan</a>
+            <a class="btn btn-out small" href="#resources">See resources</a>
+            <a class="btn btn-out small" href="#compete">Find a travel team</a>
+          </div>
+        </div>
+      </div>
+      <div data-sub="timeline" hidden>
+        <div class="tabs" id="guideTabs" role="group" aria-label="Choose an age group"></div>
+        <div class="card">
+          <h3 id="guideTitle"></h3>
+          <ul class="plain" id="guideList"></ul>
+        </div>
+        <div class="callout" style="margin-top:16px">Former players in our survey wrote that they wished they had found out about college camps and showcases sooner, and that they wanted more help during the recruiting process.</div>
+        <div class="card" style="margin-top:16px">
+          <h3>Want to track your progress?</h3>
+          <p>Tick off these steps, save email drafts and keep track of schools in My plan. It saves in your browser, with no account.</p>
+          <div><a class="btn btn-solid" href="#plan">Open My plan</a></div>
+        </div>
+      </div>
+      <div data-sub="basics" hidden>
+        <div class="card">
+          <span class="label">Recruiting basics</span>
+          <h3>How to get seen</h3>
+          <details open><summary>How recruiting usually works</summary><ul>
+            <li>Build a list of schools, then narrow it by level, location, academics and cost.</li>
+            <li>If you plan to play at the NCAA Division I or II level, register with the NCAA Eligibility Center (see Resources) and keep your grades on track.</li>
+            <li>Contact coaches yourself with a short email and a skills video.</li>
+            <li>Go to camps, showcases and campus visits at schools you really like.</li>
+            <li>Compare offers, ask questions, and decide with your family.</li></ul></details>
+          <details><summary>Ways to get seen</summary><ul>
+            <li>Make a short skills video with a clear view of you, and update it each year.</li>
+            <li>Pick showcases that coaches from your target schools attend.</li>
+            <li>Ask your club or high school coach to reach out to programs for you.</li>
+            <li>Keep your stats, schedule and grades current and easy to share.</li></ul></details>
+          <details><summary>What to put in an email to a coach</summary>
+            <p>Use the Email a coach tab for templates, and the email builder in My plan to fill them in for you.</p></details>
+          <details><summary>Questions to ask a program</summary><ul>
+            <li>How many players at my position are on the roster, and what role would I likely have?</li>
+            <li>What does a typical week look like?</li>
+            <li>How does the program support academics and injuries?</li>
+            <li>What happens to my scholarship if I get hurt?</li></ul></details>
+          <p class="muted" style="font-size:0.9rem">NCAA rules limit when coaches can start contacting recruits and how they can reply. The dates differ by division and change over time, so check the current NCAA recruiting calendar for your class year and ask your coach before you act.</p>
+        </div>
+      </div>
+
+      <div data-sub="email" hidden>
+        <div class="card">
+          <span class="label">Email a coach</span>
+          <h3>What you are hoping to get from an email</h3>
+          <p>An email is a short introduction. You are not asking for an offer. You are hoping to:</p>
+          <ul>
+            <li>Get on a coach's radar for your graduation year and position.</li>
+            <li>Find out whether the program is recruiting your class and position.</li>
+            <li>Get feedback on your video.</li>
+            <li>Learn where and when the coach will see you play.</li>
+            <li>Show real interest in the program, which coaches notice.</li>
+          </ul>
+          <p class="callout">Many first emails get no reply, and that is normal. Coaches get a lot of messages, and NCAA rules can limit how and when they reply. It is not a no. Wait three or four weeks, then send a short update with something new, such as a new video or schedule.</p>
+        </div>
+
+        <div class="card" style="margin-top:20px">
+          <h3>Email templates</h3>
+          <p class="muted">Four starting points. Brackets show what to fill in. To fill them in for you, save drafts and open them in your email app, use the email builder in My plan.</p>
+          <div id="tplList"></div>
+          <div><a class="btn btn-solid" id="tplGo" href="#plan">Open the email builder</a></div>
+        </div>
+
+        <div class="card" style="margin-top:20px">
+          <h3>Before you hit send</h3>
+          <ul class="plain">
+            <li>The coach's name and the school's name are right. Wrong-school emails get noticed.</li>
+            <li>The subject line says who you are: graduation year, position and name.</li>
+            <li>Your video link opens without a login.</li>
+            <li>It is short enough to read in under a minute.</li>
+            <li>You read it out loud, and a parent or guardian read it too.</li>
+            <li>You added the date to your tracker so you can follow up.</li>
+          </ul>
+        </div>
+
+        <div class="card" style="margin-top:20px">
+          <h3>Keep track of every school</h3>
+          <p>Record who you emailed, when, and whether they replied, so you know who to follow up with and when. The School tracker in My plan does this for you.</p>
+          <div><a class="btn btn-solid" href="#plan">Open My plan</a></div>
+        </div>
+      </div>
+
+      <div data-sub="camps" hidden>
+        <div class="card">
+          <span class="label">Camps and showcases</span>
+          <h3>What you are hoping to get from them</h3>
+          <ul>
+            <li>Be seen by coaches who recruit your position and graduation year.</li>
+            <li>Get honest feedback on where you stand compared with the level you are aiming for.</li>
+            <li>See the campus, the facilities and how the coaches teach.</li>
+            <li>Meet current players and ask what the program is really like.</li>
+            <li>Find out whether it feels like a fit. A camp is a test for you too.</li>
+          </ul>
+          <p class="callout">A camp invite, or a good day at camp, does not mean a coach plans to offer you a spot. Ask directly: "Where do I stand with your program?"</p>
+        </div>
+
+        <div class="card" style="margin-top:20px">
+          <h3>Four kinds of events</h3>
+          <details open><summary>College camps (run by one school)</summary><p>Good when the school is on your list. You get instruction and a look from the coaches you want to see you. They usually cost money, so save them for schools you are really interested in.</p></details>
+          <details><summary>Multi-school camps</summary><p>Coaches from several schools take part, so one event can put you in front of several programs. Check ahead of time which schools will be there.</p></details>
+          <details><summary>Showcases</summary><p>A club or organization invites college coaches to watch players. They are for showing what you can already do, not for learning. Ask the organizer or your coach which college coaches are expected.</p></details>
+          <details><summary>Skills clinics</summary><p>Short sessions focused on a skill like pitching, hitting or catching. Take them to get better, not to be recruited.</p></details>
+        </div>
+
+        <div class="card" style="margin-top:20px">
+          <h3>How to choose which ones to attend</h3>
+          <ol class="steps">
+            <li>Start with your list of schools.</li>
+            <li>Check each school's softball website for a camps page. Note the dates, ages and cost.</li>
+            <li>Ask your club or high school coach which events coaches from your list attend.</li>
+            <li>Check your tournament schedule so nothing conflicts.</li>
+            <li>Email the coach to ask the questions below before you pay.</li>
+            <li>Choose a few events that fit, not all of them.</li>
+          </ol>
+          <p>You do not need to attend many. Not every family can afford several camps, and a few well-chosen events are better than a long list.</p>
+          <h4 class="mini-h" style="margin-top:6px">Questions to ask before you register</h4>
+          <ul>
+            <li>Will the coaching staff evaluate players at this camp?</li>
+            <li>Which session fits my position and graduation year?</li>
+            <li>How many players attend each session?</li>
+            <li>What does the fee cover? Are there lower-cost options?</li>
+          </ul>
+        </div>
+
+        <div class="card" style="margin-top:20px">
+          <h3>Rate a camp before you sign up</h3>
+          <ul class="plain">
+            <li>The school is on my list.</li>
+            <li>The staff who recruit my position will be there.</li>
+            <li>I will be evaluated, not only coached.</li>
+            <li>It does not conflict with my club schedule.</li>
+            <li>My family can afford it, including travel.</li>
+          </ul>
+          <p class="muted" style="font-size:0.9rem">If most of these are true, the camp is worth a serious look.</p>
+        </div>
+
+        <div class="card" style="margin-top:20px">
+          <h3>Before, during and after</h3>
+          <details open><summary>Before</summary><ul>
+            <li>Send a camp question email using the template.</li>
+            <li>Have your video link and schedule ready.</li>
+            <li>Know your position, your strengths and one thing you are working on.</li></ul></details>
+          <details><summary>During</summary><ul>
+            <li>Introduce yourself to the coaches and say what school you are interested in.</li>
+            <li>Show you are coachable: listen, try the adjustment and ask questions.</li>
+            <li>Meet a current player and ask what a normal week looks like.</li></ul></details>
+          <details><summary>After</summary><ul>
+            <li>Send a thank-you email within a few days using the After a camp template.</li>
+            <li>Ask for feedback and what the coach would like to see next.</li>
+            <li>Add the camp and the date to your tracker.</li></ul></details>
+        </div>
+        <p class="src">Source for event types and choosing advice: <a href="https://extrainningsoftball.com/topical-issue-summer-camps-clinics-showcases-what-options-do-players-families-have/" target="_blank" rel="noopener">Extra Inning Softball, summer camps, clinics and showcases</a>. Which events matter most varies by region and by year, so ask your coach for a short list.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MY PLAN -->
+<section class="block page" id="plan" data-page="plan" hidden>
+  <div class="inner">
+    <div class="sec-head">
+      <span class="label">My plan</span>
+      <h2>Your recruiting plan, saved for you</h2>
+      <p>Keep your profile, checklist, email drafts, school tracker and camp notes in one place. Everything saves in this browser on this device. Nothing is sent to On Deck or anyone else, and you do not need an account. If you are under 18, use this with a parent or guardian.</p>
+    </div>
+    <details class="card" open style="margin-bottom:20px;display:block">
+      <summary style="font-weight:700;cursor:pointer">How My plan works</summary>
+      <ol class="steps" style="margin-top:14px">
+        <li><div><b>Fill in your profile</b><span>Your name, graduation year, position, school and a link to your skills video. It takes two minutes and fills in every email for you.</span></div></li>
+        <li><div><b>Build and track</b><span>Write emails in the Email builder, tick off your Checklist, add each school to the School tracker, and use School notes after camps and visits.</span></div></li>
+        <li><div><b>Back it up</b><span>Everything saves automatically in this browser. Use the three buttons below to keep a backup or start over. You only need them if you want to switch devices, keep a copy, or clear everything.</span></div></li>
+      </ol>
+    </details>
+    <div class="card plan-bar">
+      <div class="plan-rows">
+        <div class="plan-row">
+          <button class="btn btn-solid small" id="planDownload" type="button">Download my data</button>
+          <p>Saves a backup file called on-deck-my-plan.json to your device. Do this now and then, and before you switch phones or computers.</p>
+        </div>
+        <div class="plan-row">
+          <label class="btn btn-out small filebtn" for="planUpload">Load saved data<input id="planUpload" type="file" accept="application/json,.json"></label>
+          <p>Opens your files so you can choose a backup you downloaded before. It replaces what is here now. It only works with files from Download my data.</p>
+        </div>
+        <div class="plan-row">
+          <button class="btn btn-out small" id="planClear" type="button">Clear my data</button>
+          <p>Deletes everything from this browser, after asking you to confirm. Download first if you want a copy.</p>
+        </div>
+      </div>
+      <div class="confirm" id="planConfirm" hidden>
+        <span>Delete your profile, checklist, emails, tracker and notes from this browser?</span>
+        <button class="btn btn-solid small" id="planClearYes" type="button">Yes, delete</button>
+        <button class="btn btn-out small" id="planClearNo" type="button">Cancel</button>
+      </div>
+      <p class="muted" id="planStatus" role="status" style="font-size:0.9rem">Your data saves on this device as you type.</p>
+    </div>
+    <div class="tabs" id="planTabs" role="group" aria-label="My plan sections" style="margin-bottom:20px"></div>
+    <div style="max-width:780px">
+
+      <div data-plan="profile">
+        <div class="card">
+          <h3>Your profile</h3>
+          <p class="muted">These details fill in your emails. Sign with the name you use for coaches. Do not add phone numbers or home addresses.</p>
+          <div class="form-grid">
+            <label class="field" for="pName">Name you sign emails with<input id="pName" type="text" autocomplete="off"></label>
+            <label class="field" for="pYear">Graduation year<input id="pYear" type="text" autocomplete="off" placeholder="For example 2029"></label>
+            <label class="field" for="pPos">Position<input id="pPos" type="text" autocomplete="off" placeholder="Pitcher, shortstop, catcher..."></label>
+            <label class="field" for="pHS">High school<input id="pHS" type="text" autocomplete="off"></label>
+            <label class="field" for="pClub">Club team<input id="pClub" type="text" autocomplete="off"></label>
+            <label class="field" for="pGPA">GPA<input id="pGPA" type="text" autocomplete="off"></label>
+            <label class="field wide" for="pVideo">Link to your skills video<input id="pVideo" type="text" autocomplete="off" placeholder="Make sure the link is not private"></label>
+          </div>
+        </div>
+      </div>
+
+      <div data-plan="checklist" hidden>
+        <div class="tabs" id="chkTabs" role="group" aria-label="Choose an age group"></div>
+        <div class="card">
+          <h3 id="chkTitle"></h3>
+          <ul class="checklist" id="chkList"></ul>
+          <div class="progress" aria-hidden="true"><i id="chkBar"></i></div>
+          <p class="muted" id="chkCount" style="font-size:0.9rem"></p>
+        </div>
+      </div>
+
+      <div data-plan="email" hidden>
+        <div class="card">
+          <h3>Email builder</h3>
+          <p class="muted"><span id="emailProfileNote"></span> <button class="btn btn-out small" id="emailGoProfile" type="button">Edit profile</button></p>
+          <div class="form-grid">
+            <label class="field" for="eSchool">College you are writing to<input id="eSchool" type="text" autocomplete="off"></label>
+            <label class="field" for="eCoach">Coach's last name<input id="eCoach" type="text" autocomplete="off"></label>
+            <label class="field wide" for="eTo">Coach's email address (optional, used when you open the email in your email app)<input id="eTo" type="text" autocomplete="off"></label>
+            <label class="field wide" for="eCamp">Camp name and date (for camp emails)<input id="eCamp" type="text" autocomplete="off"></label>
+            <label class="field wide" for="eEvents">Your upcoming events, with dates<input id="eEvents" type="text" autocomplete="off" placeholder="Tournament name, dates, field location"></label>
+            <label class="field wide" for="eWhy">One real reason you like this program<input id="eWhy" type="text" autocomplete="off" placeholder="Coaching style, academics, a game you watched..."></label>
+            <label class="field wide" for="eNote">Something specific (what you learned at camp, or what is new since you last wrote)<input id="eNote" type="text" autocomplete="off"></label>
+          </div>
+          <div class="chips" id="emailType" role="group" aria-label="Email type"></div>
+          <div class="draft-wrap">
+            <span class="mini-h">Subject</span>
+            <div class="draft draft-subject" id="emailSubject"></div>
+            <span class="mini-h">Email</span>
+            <div class="draft" id="emailBody"></div>
+          </div>
+          <div class="row-actions">
+            <button class="btn btn-solid small" id="emailSave" type="button">Save draft</button>
+            <button class="btn btn-out small" id="emailCopy" type="button">Copy email</button>
+            <a class="btn btn-out small" id="emailMailto" href="mailto:">Open in my email app</a>
+            <button class="btn btn-out small" id="emailSent" type="button">Log as sent</button>
+            <button class="btn btn-out small" id="emailReset" type="button">Start a new email</button>
+          </div>
+          <p class="muted" id="emailMsg" role="status" style="font-size:0.9rem">Have a parent or guardian read the email before you send it. On Deck cannot send email for you. Opening it in your email app lets you review and send it yourself, then come back and choose Log as sent.</p>
+        </div>
+        <div class="card" style="margin-top:20px">
+          <h3>Before you hit send</h3>
+          <ul class="plain">
+            <li>The coach's name and the school's name are right.</li>
+            <li>The subject line says who you are: graduation year, position and name.</li>
+            <li>Your video link opens without a login.</li>
+            <li>It is short enough to read in under a minute.</li>
+            <li>You read it out loud, and a parent or guardian read it too.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div data-plan="saved" hidden>
+        <div class="saved-list" id="savedList"></div>
+      </div>
+
+      <div data-plan="notes" hidden>
+        <div class="card">
+          <h3>School notes</h3>
+          <p class="muted">Use this after a camp, a visit or a call with a coach. Write down what you liked, what you would study, and one honest question: would you want to be at this school even if you never played softball? Coaches can change and teams can have a bad year. The school is what stays.</p>
+          <div class="row-actions"><button class="btn btn-solid small" id="noteAdd" type="button">Add a note</button><span class="muted" id="noteCount" style="font-size:0.9rem"></span></div>
+        </div>
+        <div class="saved-list" id="noteList" style="margin-top:16px"></div>
+      </div>
+
+      <div data-plan="tracker" hidden>
+        <div class="card">
+          <h3>School tracker</h3>
+          <p class="muted">Track every school so you know who to follow up with and when. Choosing Log as sent in the email builder adds a row here for you.</p>
+          <div class="table-wrap">
+            <table class="plan-table">
+              <thead><tr><th>School</th><th>Coach</th><th>Emailed</th><th>Reply</th><th>Camp or event</th><th>Next step</th><th><span class="sr">Remove</span></th></tr></thead>
+              <tbody id="trackBody"></tbody>
+            </table>
+          </div>
+          <div class="row-actions">
+            <button class="btn btn-solid small" id="trackAdd" type="button">Add a school</button>
+            <span class="muted" id="trackCount" style="font-size:0.9rem"></span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- COACHES -->
+<section class="block page" id="coaches" data-page="coaches" hidden>
+  <div class="inner">
+    <div class="sec-head">
+      <span class="label">Coach toolkit</span>
+      <h2>Help players see the whole map</h2>
+      <p><b>This page is for people who already coach.</b> It is not a guide to becoming a coach. For that, see the Coach pathway under Explore. Coaches are the main source of guidance for players, and many coaches were never shown the full range of options either. Use the ideas below to talk with your players about their futures, including pro, and including "I just want to play."</p>
+    </div>
+    <div style="max-width:820px">
+      <details open><summary>Start the conversation</summary><ul><li>"What do you love most about softball?"</li><li>"What would you want softball to be in your life in ten years?"</li><li>"What would you like to know that nobody has told you yet?"</li></ul></details>
+      <details><summary>Describe pro softball accurately</summary><p>Say that the AUSL is a real league with limited spots, a short season, and public ways in. Share the numbers from the page above and avoid both hype and dismissal. Let the player decide how much it matters to them.</p></details>
+      <details><summary>Make room for "I just want to play"</summary><p>Some players want softball in their lives without wanting it as a career. Treat that as a complete answer. Point them to college, club, adult leagues or coaching.</p></details>
+      <details><summary>Be patient with players who know their options but are not ready</summary><p>Some players understand what is out there and still do not want to explore it yet. Check in again later instead of pressing, and let them know the door stays open. Staying in the sports world does not require being the athlete.</p></details>
+      <details><summary>Show the paths beside the field</summary><p>Training, rehab, media and coaching are all softball careers. Invite a former player or a local professional to talk to the team for fifteen minutes.</p></details>
+      <details><summary>Where to send players next</summary><p>The quiz and pathways map on this page, and the recruiting guide for their age group.</p></details>
+    </div>
+  </div>
+</section>
+
+<!-- SPARK -->
+<section class="block page" id="spark" data-page="spark" hidden>
+  <div class="inner">
+    <div class="sec-head">
+      <span class="label">Find the spark</span>
+      <h2>Not feeling it right now? That is okay.</h2>
+      <p>Lots of players hit a stretch where softball stops being fun. It happens to people who love the game. This page is for finding your way back to it, or for working out what you want instead. In our survey, <b>19 of 21 former players</b> said they played for the love of the game, so the spark was there once.</p>
+    </div>
+    <div class="two-up">
+      <div class="card">
+        <h3>Ways players find it again</h3>
+        <ul class="plain">
+          <li><b>Find your people.</b> Teammates who become lifelong friends are often the reason players stay. If your team does not feel like that, look at other teams, clubs or leagues.</li>
+          <li><b>Find a mentor coach.</b> A coach who believes in you and wants you to grow can change how the whole game feels, and often stays in your life for good.</li>
+          <li><b>Change your role.</b> Try a new position, help coach a younger team, or run the scorebook. A different view of the game can bring it back.</li>
+          <li><b>Take the pressure off.</b> Play a pickup game, a rec league or a co-ed team, with no stats and no recruiting.</li>
+          <li><b>Remember why you started.</b> Write down the first three things you loved about it. Is it still one of them?</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>The hard parts, said honestly</h3>
+        <p>Many players worry about what they have seen or heard. These worries are real, and they are not a reason you have to quit.</p>
+        <ul class="plain">
+          <li><b>Toxic coaches or teammates.</b> A bad environment is not your fault, and it does not mean the sport is wrong for you. You are allowed to look for a better team. Talk to a parent, guardian or another coach you trust.</li>
+          <li><b>Moving between teams or schools.</b> Players move for many reasons, and plenty do it successfully. Ask yourself what you would want to be different next time.</li>
+          <li><b>The mental side.</b> Pressure, burnout and doubt are common in sports. Taking a break, or talking to a trusted adult, a counselor or a sports psychologist, is a strong move.</li>
+        </ul>
+        <div class="callout support">If sports stress is making everything feel too heavy, please talk to a trusted adult. In the United States you can call or text <b>988</b> at any time to reach the Suicide and Crisis Lifeline.</div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:18px;max-width:780px">
+      <h3>Stories of players who did not expect to go anywhere</h3>
+      <p>Some of the best stories are from players who never thought they would make it, and then did. We do not have those stories yet, and we will not make any up. If you or someone you know has one, we want to share it.</p>
+      <div class="row-actions"><a class="btn btn-solid small" href="#dugout">Share it in The Dugout</a><a class="btn btn-out small" href="#pathways">See all the pathways</a></div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPETE -->
+<section class="block page" id="compete" data-page="compete" hidden>
+  <div class="inner">
+    <div class="sec-head">
+      <span class="label">Get competitive</span>
+      <h2>Find a travel team near you</h2>
+      <p>Travel (club) softball plays tougher competition, in more places, in front of more college coaches. It is often how players get seen. Rec ball is a great place to start and a complete answer on its own. If you want more, this page helps you look.</p>
+    </div>
+    <div class="two-up">
+      <div class="card">
+        <h3>Search for teams</h3>
+        <p class="muted">On Deck does not keep a list of teams, because teams change every year and we cannot check them all. Choose where you live and we will open a web search for travel softball teams there.</p>
+        <div class="form-grid">
+          <label class="field" for="cState">State<select id="cState"></select></label>
+          <label class="field" for="cCity">City or town (optional)<input id="cCity" type="text" autocomplete="off"></label>
+          <label class="field wide" for="cAge">Age group (optional)<select id="cAge"><option value="">Any age</option><option value="8U">8U</option><option value="10U">10U</option><option value="12U">12U</option><option value="14U">14U</option><option value="16U">16U</option><option value="18U">18U</option></select></label>
+        </div>
+        <div class="row-actions">
+          <a class="btn btn-solid small" id="cGo" href="https://www.google.com/search?q=travel+softball+teams" target="_blank" rel="noopener">Search the web for teams</a>
+          <a class="btn btn-out small" id="cTry" href="https://www.google.com/search?q=softball+tryouts" target="_blank" rel="noopener">Search for tryouts</a>
+        </div>
+        <p class="muted" style="font-size:0.85rem">These open Google in a new tab. We do not send anything about you to On Deck.</p>
+      </div>
+      <div class="card">
+        <h3>Another way to find a team</h3>
+        <p><a href="https://www.usasoftball.com/" target="_blank" rel="noopener">USA Softball</a> is the national governing body of the sport. It sanctions competition in every state through state and metro associations, and those associations can point you to teams and leagues in your area. The national office does not match players with teams, so contact your local association.</p>
+        <p>Also ask your school coach, your current club coach and other parents. Teams often find players by word of mouth.</p>
+      </div>
+    </div>
+    <div class="two-up" style="margin-top:18px">
+      <div class="card">
+        <h3>Rec or travel?</h3>
+        <ul class="plain">
+          <li><b>Rec:</b> closer to home, lower cost, less travel, more about learning and fun.</li>
+          <li><b>Travel:</b> more practices and games, tougher opponents, tournaments in other cities and states, and more chances for coaches to see you.</li>
+          <li>Both can be great. Pick the one that matches what you want right now. You can change later.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Questions to ask a team</h3>
+        <ul class="plain">
+          <li>What is the full cost for the season, including tournaments, travel and uniforms?</li>
+          <li>How many practices and tournaments are there, and how far do you travel?</li>
+          <li>How do you handle playing time, and how do you talk to players?</li>
+          <li>Do players from this team go on to play in college? Can I talk to a current family?</li>
+          <li>Are the coaches background-checked and certified?</li>
+        </ul>
+      </div>
+    </div>
+    <p class="note">Take a parent or guardian to any tryout. Be careful with any team that promises a scholarship or pushes you to pay quickly.</p>
+  </div>
+</section>
+
+<!-- DUGOUT -->
+<section class="block page" id="dugout" data-page="dugout" hidden>
+  <div class="inner">
+    <div class="sec-head">
+      <span class="label">The Dugout</span>
+      <h2>Where the softball community shows up</h2>
+      <p>Signing days, camp photos, tournament moments, teammates and notes that make someone's day. The Dugout is where players, families and coaches share what makes this game worth loving. Be inspired, or send in something of your own.</p>
+    </div>
+    <div class="chips" id="dugFilters" role="group" aria-label="Filter posts"></div>
+    <div class="tiles" id="dugGrid"></div>
+    <p class="note" id="dugNote"></p>
+    <div class="two-up" style="margin-top:24px">
+      <div class="card">
+        <h3>Send us something</h3>
+        <p id="dugSubmitText"></p>
+        <div class="row-actions" id="dugSubmitActions"></div>
+      </div>
+      <div class="card">
+        <h3>The ground rules</h3>
+        <ul class="plain">
+          <li>If the photo shows someone under 18, a parent or guardian must say it is okay to share.</li>
+          <li>Share first names or initials only. Do not include last names, phone numbers, addresses or exact locations.</li>
+          <li>Only send photos and words you made or have permission to use.</li>
+          <li>Kind and encouraging only. Everything is read by a person before it goes up, and we can say no.</li>
+          <li>You can ask us to take your post down at any time.</li>
+        </ul>
+      </div>
+    </div>
+    <p class="note">Categories: signings and commitments, camps and tournaments, teammates, motivation, and stories.</p>
+  </div>
+</section>
+
+<!-- RESOURCES -->
+<section class="block page" id="resources" data-page="resources" hidden>
+  <div class="inner">
+    <div class="sec-head">
+      <span class="label">Resources</span>
+      <h2>Helpful places to go next</h2>
+      <p>Links to official sites and platforms that players and families use. On Deck is not affiliated with any of them. Always read the details on each site, because rules and costs change.</p>
+    </div>
+    <div class="two-up">
+      <div class="card link-card">
+        <span class="label">Recruiting platform</span>
+        <h4>FieldLevel</h4>
+        <p>A recruiting network for athletes and coaches that covers softball and dozens of other sports. According to its public description, college coaches can search for athletes, and an athlete is usually connected through a coach. Check the site for how profiles work and current costs.</p>
+        <a class="btn btn-solid small" href="https://www.fieldlevel.com/" target="_blank" rel="noopener">Go to FieldLevel</a>
+      </div>
+      <div class="card link-card">
+        <span class="label">College eligibility</span>
+        <h4>NCAA Eligibility Center</h4>
+        <p>Students who want to compete at an NCAA school must register. Division I and II players choose the academic and athletics certification account, and Division III players choose the profile page. Students may register at any age, and early registration can help avoid delays.</p>
+        <a class="btn btn-solid small" href="https://www.ncaa.org/eligibility-center/register/" target="_blank" rel="noopener">Register with the NCAA</a>
+      </div>
+      <div class="card link-card">
+        <span class="label">Governing body</span>
+        <h4>USA Softball</h4>
+        <p>The national governing body of softball in the US. Its state and metro associations register teams and leagues and run qualifying tournaments. Use it to find your local association.</p>
+        <a class="btn btn-solid small" href="https://www.usasoftball.com/" target="_blank" rel="noopener">Go to USA Softball</a>
+      </div>
+      <div class="card link-card">
+        <span class="label">Pro softball</span>
+        <h4>Athletes Unlimited Softball League</h4>
+        <p>The official AUSL site for news, schedules, teams and draft information.</p>
+        <a class="btn btn-solid small" href="https://theausl.com" target="_blank" rel="noopener">Go to theausl.com</a>
+      </div>
+    </div>
+    <div class="card" style="margin-top:18px;max-width:780px">
+      <h3>Tips for using these sites</h3>
+      <ul class="plain">
+        <li>Ask your coach which recruiting platforms college coaches in your area actually use, before you pay for anything.</li>
+        <li>Players under 18 should set up accounts with a parent or guardian.</li>
+        <li>No site can guarantee a spot. Emailing coaches yourself, going to camps and keeping your grades up still matter most. Use the Guide and My plan to do those.</li>
+      </ul>
+      <div class="row-actions"><a class="btn btn-solid small" href="#guide">Open the Guide</a><a class="btn btn-out small" href="#plan">Open My plan</a></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="inner">
+    <h2>Help test On Deck</h2>
+    <p>This is version 4 of a concept prototype, built to be tried by real players, parents and coaches. It is not affiliated with or endorsed by the AUSL or TOGETHXR. Sample profiles and mentors are placeholders.</p>
+    <p>Tried it? Tell us what helped, what confused you, and what is missing. Use the feedback form you were sent.</p>
+    <p style="font-size:0.8rem;opacity:0.7">Survey figures come from 35 current players, 21 former players and 3 coaches. Responses are self-reported, and the sample skews toward high school age and older.</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var PATHS = [
+    { id: 'college', name: 'Play in college', tag: 'D1, D2, D3, NAIA, junior college',
+      summary: 'College softball is the most common next step, and for many players it is the destination. It also leads to most other paths.',
+      looks: ['Practice, class and travel in a full-time schedule', 'Programs at several levels, each with different scholarships and academics', 'A team of people who often become a lifelong network'],
+      needs: ['Grades and class requirements that keep you eligible', 'Being seen by coaches at camps, showcases and tournaments', 'A list of schools that fit your game, your major and your budget', 'A school you could picture finishing without softball. Ask yourself: if I got hurt or stopped playing, would I still want to be here?'],
+      tryit: 'Write down three schools you have heard of and one thing you like about each. Share the list with your coach.',
+      survey: '<b>10 of 35</b> current players (29%) are most interested in playing college softball. <b>14 of 21</b> former players (67%) were playing to reach college.' },
+    { id: 'pro', name: 'Play pro', tag: 'AUSL and beyond',
+      summary: 'Pro softball is a real path with limited spots. The AUSL played its second season in 2026 with six teams.',
+      looks: ['A short season, 25 games per team in 2026, plus travel', 'Games on ESPN and other national broadcasts', 'Limited roster spots and a league still growing'],
+      needs: ['Usually a standout college career and a Golden Ticket for the College Draft', 'Or opting in to the Allocation Draft, including from the Reserve Pool or another pro league', 'A plan for income and work around a short season. Check the league for current pay details'],
+      tryit: 'Watch one AUSL game with someone who plays. Notice the positions, the pace, and what the players do between pitches.',
+      survey: '<b>1 of 35</b> current players is most interested in pro. Among former players, <b>9 of 21</b> said it would not earn enough and <b>13 of 21</b> said it did not feel realistic. About 43% found pro softball interesting and 24% found it realistic. Interest and realism are different questions.' },
+    { id: 'coach', name: 'Coach', tag: 'Youth, high school, travel, college',
+      summary: 'Coaching lets you keep the game and pass it on. It can be a side role or a career.',
+      looks: ['Running practices and teaching skills', 'Building a team culture and mentoring players', 'Roles from volunteer clinic leader to college head coach'],
+      needs: ['Strong understanding of the game and how to explain it', 'Patience with beginners and parents', 'Safety and background-check requirements for working with kids'],
+      tryit: 'Help with a younger team or clinic once this month. Ask the coach what they would tell a new coach.',
+      survey: '<b>17 of 35</b> current players (49%) are most interested in coaching at any level. <b>16 of 21</b> former players (76%) said coaches gave them the most help with what comes after softball.' },
+    { id: 'train', name: 'Train and heal athletes', tag: 'PT, athletic training, strength, sports medicine',
+      summary: 'Physical therapy, athletic training and strength coaching keep players healthy and let you stay close to sport.',
+      looks: ['Working with athletes on recovery, strength and prevention', 'Settings from clinics to college teams to pro staffs', 'A mix of science, hands-on work and communication'],
+      needs: ['A degree path that matches the role, often with a license or certification', 'Strong science coursework', 'Observation hours or shadowing to see the work first'],
+      tryit: 'Ask the athletic trainer or physical therapist at your school or club if you can shadow for a morning.',
+      survey: '<b>16 of 35</b> current players (46%) are most interested in working with athletes. Many wrote about physical therapy, athletic training and related health careers.' },
+    { id: 'media', name: 'Media and business', tag: 'Broadcast, content, front office',
+      summary: 'Games need people to film them, write about them, sell them and run them. Women\'s sports are growing in these roles too.',
+      looks: ['Broadcasting, writing, photo, video and social media', 'Team and league operations, partnerships and events', 'Creative work that often starts as a hobby'],
+      needs: ['A portfolio of real work, even small projects', 'Skills in writing, editing, speaking or organizing', 'Curiosity about how sports businesses make money'],
+      tryit: 'Film and edit a 30-second highlight of your team. Show it to a teammate and ask what they would change.',
+      survey: 'We did not ask about this path in the first survey. It is a gap we plan to test.' },
+    { id: 'play', name: 'Play for the love of it', tag: 'Club, rec, adult leagues, with your kids someday',
+      summary: 'Many players want softball in their lives without making it a career. That is a complete answer.',
+      looks: ['Adult co-ed and recreational leagues', 'Pickup games, clinics and teaching friends or family', 'Softball as a source of friends, fitness and fun'],
+      needs: ['A few friends and a field', 'Time that fits around school or work', 'A league near you. Ask your coach or town recreation office'],
+      tryit: 'Ask two teammates what they hope softball looks like for them at 25.',
+      survey: '<b>19 of 21</b> former players (91%) played for the love of the game and about <b>13 of 21</b> (62%) wanted to keep playing after they stopped. <b>5 of 35</b> current players said they are not interested in a future in softball.' }
+  ];
+
+  var current = 'college';
+
+  function renderTabs() {
+    var el = document.getElementById('pathTabs');
+    el.innerHTML = '';
+    PATHS.forEach(function (p) {
+      var b = document.createElement('button');
+      b.className = 'path-tab';
+      b.type = 'button';
+      b.setAttribute('aria-pressed', p.id === current ? 'true' : 'false');
+      b.innerHTML = '<strong>' + p.name + '</strong><span>' + p.tag + '</span>';
+      b.addEventListener('click', function () { current = p.id; renderTabs(); renderPanel(); });
+      el.appendChild(b);
+    });
+  }
+  function li(a) { return a.map(function (x) { return '<li>' + x + '</li>'; }).join(''); }
+  function renderPanel() {
+    var p = PATHS.filter(function (x) { return x.id === current; })[0];
+    document.getElementById('pathPanel').innerHTML =
+      '<h3>' + p.name + '</h3><p>' + p.summary + '</p>' +
+      '<div class="two-col"><div><h4>What it looks like</h4><ul>' + li(p.looks) + '</ul></div>' +
+      '<div><h4>What it takes</h4><ul>' + li(p.needs) + '</ul></div></div>' +
+      '<div class="try"><span class="mini-h" style="display:block;margin-bottom:4px">Try this week</span>' + p.tryit + '</div>' +
+      '<p class="survey-note">' + p.survey + '</p>';
+  }
+
+  /* Quiz */
+  var QUIZ = [
+    { q: 'You have a free Saturday morning. What are you most likely doing?', a: [
+      ['Hitting off a tee, just because', { college: 2, pro: 2 }],
+      ['Helping a younger kid with her swing', { coach: 3 }],
+      ['Stretching, rolling out and reading about recovery', { train: 3 }],
+      ['Filming a highlight and editing it', { media: 3 }],
+      ['Sleeping in, then a pickup game with friends', { play: 3 }]] },
+    { q: 'What is the best part of softball for you?', a: [
+      ['Competing against the best players I can find', { pro: 2, college: 2 }],
+      ['Teaching it and watching someone get it', { coach: 3 }],
+      ['Understanding how bodies get stronger and heal', { train: 3 }],
+      ['Telling the story of a great game', { media: 3 }],
+      ['The friends and the fun', { play: 3 }]] },
+    { q: 'Picture yourself at 25. Which sounds best?', a: [
+      ['Wearing a team jersey on TV', { pro: 3 }],
+      ['Finishing a degree I picked with softball in mind', { college: 3 }],
+      ['Running my own team or clinic', { coach: 3 }],
+      ['Working with athletes at a clinic or on a staff', { train: 3 }],
+      ['Working in sports media or the business side', { media: 3 }],
+      ['Playing in a league on weeknights, with a job I like', { play: 3 }]] },
+    { q: 'How do you feel about travel, pressure and living by a schedule?', a: [
+      ['I love it. Bring it on', { pro: 3, college: 1 }],
+      ['I like it alongside school', { college: 3 }],
+      ['I prefer helping from the sideline', { coach: 2, train: 1 }],
+      ['I prefer working behind the scenes', { media: 2, train: 1 }],
+      ['I want balance. Softball should not run everything', { play: 3 }]] },
+    { q: 'Pick a superpower.', a: [
+      ['A pitch or swing nobody can stop', { pro: 3 }],
+      ['Reading any hitter and fixing her swing in one tip', { coach: 3 }],
+      ['Healing from any injury overnight', { train: 3 }],
+      ['Every game broadcast with my voice', { media: 3 }],
+      ['Loving the game just as much at 60', { play: 3 }]] },
+    { q: 'What matters most in your future?', a: [
+      ['Competing at the highest level', { pro: 2, college: 2 }],
+      ['Helping other people', { coach: 2, train: 2 }],
+      ['A degree and a stable path', { college: 2, train: 1 }],
+      ['Creating things people see', { media: 3 }],
+      ['Time for everything else I care about', { play: 3 }]] }
+  ];
+  var qi = 0, scores = {};
+  function resetQuiz() { qi = 0; scores = {}; PATHS.forEach(function (p) { scores[p.id] = 0; }); renderQuiz(); }
+  function renderQuiz() {
+    var box = document.getElementById('quizBox');
+    if (qi < QUIZ.length) {
+      var q = QUIZ[qi];
+      box.innerHTML = '<span class="label">Question ' + (qi + 1) + ' of ' + QUIZ.length + '</span>' +
+        '<div class="quiz-progress"><i style="width:' + (qi / QUIZ.length * 100) + '%"></i></div>' +
+        '<h3>' + q.q + '</h3><div class="opts"></div>';
+      var opts = box.querySelector('.opts');
+      q.a.forEach(function (a) {
+        var b = document.createElement('button');
+        b.type = 'button'; b.className = 'opt'; b.textContent = a[0];
+        b.addEventListener('click', function () {
+          for (var k in a[1]) { scores[k] += a[1][k]; }
+          qi++; renderQuiz();
+        });
+        opts.appendChild(b);
+      });
+      return;
+    }
+    var order = PATHS.slice().sort(function (a, b) { return scores[b.id] - scores[a.id]; });
+    var top = order[0], second = order[1];
+    var max = scores[top.id] || 1;
+    var msg = {
+      play: 'Playing for the love of it is a full answer. Plenty of players keep softball in their lives without making it a job, and that is a good outcome.',
+      pro: 'Pro softball is a real path with limited spots. Read the real numbers below and ask a coach how far you are from the next step.',
+      college: 'College softball is the step many players aim for, and it keeps other paths open, including pro, coaching and training.',
+      coach: 'You like helping others improve. Coaching can start now, with a younger team or clinic.',
+      train: 'You are drawn to how athletes perform and recover. Try shadowing a trainer or physical therapist.',
+      media: 'You like telling the story. Start small with a highlight, a post, or a game recap.'
+    };
+    box.innerHTML = '<span class="label">Your result for today</span><div class="quiz-progress"><i style="width:100%"></i></div>' +
+      '<h3>' + top.name + '</h3><p>' + msg[top.id] + ' Your second closest fit is <b>' + second.name.toLowerCase() + '</b>.</p>' +
+      '<div class="result-bars">' + order.map(function (p) {
+        return '<div class="bar-row"><span>' + p.name + '</span><div class="bar-track"><div class="bar-fill" style="width:' + (scores[p.id] / max * 100) + '%"></div></div></div>';
+      }).join('') + '</div>' +
+      '<div class="quiz-actions"><a class="btn btn-ball" href="#pathways" id="seePath">See this path</a><button class="btn btn-line" type="button" id="retake">Retake the quiz</button></div>';
+    document.getElementById('seePath').addEventListener('click', function () { current = top.id; renderTabs(); renderPanel(); });
+    document.getElementById('retake').addEventListener('click', resetQuiz);
+  }
+
+  /* Mentors */
+  var MENTORS = [
+    { role: 'Former D1 pitcher, now a physical therapist', tags: ['college', 'train'], talk: 'Recruiting, injuries, balancing school and sport' },
+    { role: 'Current pro player', tags: ['pro', 'college'], talk: 'Draft routes, season life, income around a short season' },
+    { role: 'High school head coach', tags: ['coach', 'college'], talk: 'Showcases, getting noticed, starting to coach' },
+    { role: 'Former player, now on a broadcast crew', tags: ['media'], talk: 'Breaking into media, building a portfolio' },
+    { role: 'Adult league player and nurse', tags: ['play'], talk: 'Staying in the game after college, finding a league' },
+    { role: 'Athletic trainer for a college team', tags: ['train', 'coach'], talk: 'Degree paths, shadowing, working with teams' }
+  ];
+  var mf = null;
+  function renderMentors() {
+    var chips = document.getElementById('mentorChips');
+    chips.innerHTML = '';
+    var all = document.createElement('button');
+    all.type = 'button'; all.className = 'chip'; all.textContent = 'All'; all.setAttribute('aria-pressed', mf === null ? 'true' : 'false');
+    all.addEventListener('click', function () { mf = null; renderMentors(); });
+    chips.appendChild(all);
+    PATHS.forEach(function (p) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'chip'; b.textContent = p.name; b.setAttribute('aria-pressed', mf === p.id ? 'true' : 'false');
+      b.addEventListener('click', function () { mf = p.id; renderMentors(); });
+      chips.appendChild(b);
+    });
+    var list = MENTORS.filter(function (m) { return mf === null || m.tags.indexOf(mf) > -1; });
+    document.getElementById('mentorGrid').innerHTML = list.map(function (m) {
+      return '<div class="card"><div><span class="badge">Sample mentor</span></div><h4 style="font-size:1.5rem;font-weight:800">' + m.role + '</h4><p class="muted"><b style="color:var(--ink)">Can talk about:</b> ' + m.talk + '</p></div>';
+    }).join('');
+  }
+
+  /* Helpers */
+  function $(id) { return document.getElementById(id); }
+  function str(x, n) { return typeof x === 'string' ? x.slice(0, n) : ''; }
+  function uid() { return 'i' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+  function today() { var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+  function niceDate(s) {
+    var p = String(s || '').split('-');
+    if (p.length !== 3) { return s || ''; }
+    var m = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][+p[1] - 1];
+    return m ? m + ' ' + (+p[2]) + ', ' + p[0] : s;
+  }
+  function chip(label, pressed, onClick) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'chip'; b.textContent = label;
+    b.setAttribute('aria-pressed', pressed ? 'true' : 'false');
+    b.addEventListener('click', onClick);
+    return b;
+  }
+
+  /* Spotlights: sample layout. Choose who, then a question, and see every person's answer. */
+  var SPOT = {
+    pro: { label: 'Pro players', who: '[Player name]', sub: '[Team, position, hometown]', groups: [
+      ['Growing up', ['Where did you grow up playing softball?', 'Who got you into the game?', 'What did you love about it as a kid?']],
+      ['The dream', ['What made you want to play in college, and then pro?', 'When did playing pro start to feel possible?', 'Was there a moment you almost quit or doubted yourself?']],
+      ['The road', ['How did you get to play pro?', 'What did a normal week look like on the way?', 'What did people get wrong about your path?']],
+      ['Now and advice', ['What is a normal week like in season?', 'What do you do outside of softball?', 'Pay and life off the field (answered with the league\u2019s okay)', 'What do you wish you knew at 14?', 'What would you tell a player who is not sure what she wants?']]
+    ] },
+    college: { label: 'College players', who: '[Player name]', sub: '[School, division, position, year]', groups: [
+      ['Getting there', ['How did you get recruited?', 'What made you choose this school?', 'Did you ever think college softball was not for you?']],
+      ['The school', ['Would you want to be at this school without softball? Why?', 'What are you studying, and why?', 'Have you ever transferred, or thought about it?']],
+      ['Life as a college athlete', ['What is a normal week like?', 'How do you balance school and softball?', 'What surprised you most?']],
+      ['Advice', ['What do you wish you knew at 14?', 'What would you tell a player who is not sure she wants to play in college?']]
+    ] },
+    coach: { label: 'Coaches', who: '[Coach name]', sub: '[School or club, years coaching]', groups: [
+      ['Becoming a coach', ['How did you become a coach?', 'What did you do after you stopped playing?', 'What do you love about coaching?']],
+      ['Recruiting', ['What do you look for in a recruit besides skill?', 'What makes an email from a player stand out?', 'What do you wish players and parents knew about recruiting?']],
+      ['Advice', ['What would you tell a player who is done playing but wants to stay in softball?', 'What would you tell a player who is not sure what she wants?']]
+    ] }
+  };
+  var SPOT_WHO = ['pro', 'college', 'coach'];
+  var spotWho = 'pro', spotQ = 0;
+  function spotFlat() { var out = []; SPOT[spotWho].groups.forEach(function (g) { g[1].forEach(function (q) { out.push(q); }); }); return out; }
+  function renderSpot() {
+    var who = $('spotWho');
+    who.innerHTML = '';
+    SPOT_WHO.forEach(function (k) { who.appendChild(chip(SPOT[k].label, k === spotWho, function () { spotWho = k; spotQ = 0; renderSpot(); })); });
+    var sel = $('spotSel');
+    sel.innerHTML = '';
+    var idx = 0;
+    SPOT[spotWho].groups.forEach(function (g) {
+      var og = document.createElement('optgroup'); og.label = g[0];
+      g[1].forEach(function (q) { var o = document.createElement('option'); o.value = String(idx); o.textContent = q; og.appendChild(o); idx++; });
+      sel.appendChild(og);
+    });
+    sel.value = String(spotQ);
+    var grid = $('spotGrid');
+    grid.innerHTML = '';
+    var q = spotFlat()[spotQ], cfg = SPOT[spotWho];
+    for (var n = 0; n < 9; n++) {
+      var c = document.createElement('div');
+      c.className = 'card spot';
+      c.innerHTML = '<div><span class="badge">Sample layout</span></div><h3></h3><p class="muted"></p>' +
+        '<p class="quote">&ldquo;[A short quote from her interview]&rdquo;</p>' +
+        '<div><span class="mini-h">Question</span><p class="q"></p><p class="a">[Her answer, in her own words]</p></div>';
+      c.querySelector('h3').textContent = cfg.who;
+      c.querySelector('.muted').textContent = cfg.sub;
+      c.querySelector('.q').textContent = q;
+      grid.appendChild(c);
+    }
+  }
+
+  /* The Dugout. Add real posts to POSTS. Set formUrl (a form that collects submissions) when ready. */
+  var DUGOUT = { formUrl: '', email: '' };
+  var POSTS = []; /* each: { cat: 'signings', src: 'photos/name.jpg', alt: 'Describe the photo', caption: 'First names only' } */
+  var DCATS = [['all', 'All'], ['signings', 'Signings'], ['camps', 'Camps and tournaments'], ['team', 'Teammates'], ['motivation', 'Motivation'], ['stories', 'Stories']];
+  var SAMPLE_POSTS = [
+    { cat: 'signings', ph: 'Signing day', caption: 'Sample: a player and family at a signing table. Real photos will go here.' },
+    { cat: 'camps', ph: 'Camp day', caption: 'Sample: a group photo from a college camp, with what she learned.' },
+    { cat: 'team', ph: 'Forever friends', caption: 'Sample: teammates after a long weekend of games.' },
+    { cat: 'motivation', ph: 'Keep going', caption: 'Sample: a note or photo that gets someone through a tough day.' },
+    { cat: 'stories', ph: 'Did not expect this', caption: 'Sample: a short story from a player who did not think she would go anywhere, and did.' },
+    { cat: 'camps', ph: 'Tournament', caption: 'Sample: a favorite tournament moment.' }
+  ];
+  var dcat = 'all';
+  function renderDugout() {
+    var f = $('dugFilters');
+    f.innerHTML = '';
+    DCATS.forEach(function (c) { f.appendChild(chip(c[1], c[0] === dcat, function () { dcat = c[0]; renderDugout(); })); });
+    var grid = $('dugGrid');
+    grid.innerHTML = '';
+    var real = POSTS.length > 0;
+    var list = (real ? POSTS : SAMPLE_POSTS).filter(function (p) { return dcat === 'all' || p.cat === dcat; });
+    list.forEach(function (p) {
+      var t = document.createElement('div'); t.className = 'tile';
+      var m;
+      if (p.src) { m = document.createElement('img'); m.src = p.src; m.alt = str(p.alt, 200); m.loading = 'lazy'; }
+      else { m = document.createElement('div'); m.className = 'ph'; m.textContent = p.ph; }
+      var cap = document.createElement('div'); cap.className = 'cap';
+      var b = document.createElement('div');
+      var lab = document.createElement('span'); lab.className = 'badge'; lab.textContent = real ? '' : 'Sample';
+      var cn = ''; DCATS.forEach(function (c) { if (c[0] === p.cat) { cn = c[1]; } });
+      if (real) { lab.textContent = cn; } else { lab.textContent = 'Sample: ' + cn; }
+      b.appendChild(lab);
+      var pp = document.createElement('p'); pp.textContent = p.caption;
+      cap.appendChild(b); cap.appendChild(pp);
+      t.appendChild(m); t.appendChild(cap); grid.appendChild(t);
+    });
+    if (!list.length) { var e = document.createElement('p'); e.className = 'muted'; e.textContent = 'Nothing here yet. Be the first to send something in.'; grid.appendChild(e); }
+    $('dugNote').textContent = real ? '' : 'These are sample tiles that show the layout. No real photos or people are shown yet.';
+    var txt = $('dugSubmitText'), acts = $('dugSubmitActions');
+    acts.innerHTML = '';
+    var url = String(DUGOUT.formUrl || ''), mail = String(DUGOUT.email || '');
+    if (/^https:\/\//.test(url)) {
+      txt.textContent = 'Send a photo, a short story, or a note to a teammate. A parent or guardian should send it in if you are under 18.';
+      var a1 = document.createElement('a'); a1.className = 'btn btn-solid small'; a1.href = url; a1.target = '_blank'; a1.rel = 'noopener'; a1.textContent = 'Send in a photo or story';
+      acts.appendChild(a1);
+    } else if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(mail)) {
+      txt.textContent = 'Email us a photo, a short story, or a note to a teammate. A parent or guardian should send it if you are under 18.';
+      var a2 = document.createElement('a'); a2.className = 'btn btn-solid small'; a2.href = 'mailto:' + mail; a2.textContent = 'Email a photo or story';
+      acts.appendChild(a2);
+    } else {
+      txt.textContent = 'Submissions open soon. This is a prototype, so there is no way to send a photo yet. When it opens, you will be able to send in signing photos, camp and tournament pictures, and stories. Please read the ground rules first.';
+    }
+  }
+
+  /* Get competitive: opens a web search, nothing is stored or sent to On Deck */
+  var STATES = ['Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware','District of Columbia','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts','Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont','Virginia','Washington','West Virginia','Wisconsin','Wyoming'];
+  function wireCompete() {
+    var sel = $('cState');
+    var o0 = document.createElement('option'); o0.value = ''; o0.textContent = 'Choose a state'; sel.appendChild(o0);
+    STATES.forEach(function (n) { var o = document.createElement('option'); o.value = n; o.textContent = n; sel.appendChild(o); });
+    function upd() {
+      var place = [$('cCity').value.trim().slice(0, 60), sel.value].filter(Boolean).join(' ');
+      var age = $('cAge').value;
+      function link(base) { return 'https://www.google.com/search?q=' + encodeURIComponent((base + ' ' + age + ' ' + place).replace(/\s+/g, ' ').trim()); }
+      $('cGo').href = link('travel softball teams');
+      $('cTry').href = link('softball tryouts');
+    }
+    sel.addEventListener('change', upd); $('cCity').addEventListener('input', upd); $('cAge').addEventListener('change', upd);
+  }
+
+  /* Guide: read only. Checklists and saving live in My plan. */
+  var GUIDE = [
+    { id: '11-13', label: 'Ages 11 to 13', title: 'Explore', items: [
+      'Try more than one position, and another sport if you want to.',
+      'Watch a college or AUSL game with someone who plays, and notice what the athletes do between pitches.',
+      'Ask your coach what the next level looks like and what you would need to work on.',
+      'Write down three things you love about softball. They point to paths, not only to playing.'] },
+    { id: '14-15', label: 'Ages 14 to 15', title: 'Get ready to be seen', items: [
+      'Record a short skills video: swing, throw and your main position.',
+      'Find camps and showcases near you, and ask your coach which ones college coaches attend.',
+      'Learn the NCAA Eligibility Center class and grade requirements before high school gets busy.',
+      'Start a simple log of stats, dates and results.',
+      'Talk to one former player about what she wishes she had known.'] },
+    { id: '16-17', label: 'Ages 16 to 17', title: 'Reach out and compare', items: [
+      'Build a list of schools that fit softball, academics and cost.',
+      'Email coaches with your video, schedule and grades, and ask what they look for.',
+      'Ask each program about scholarships, academics, and what happens if you get hurt.',
+      'Read any offer with a parent or guardian.',
+      'Check the current NCAA recruiting contact rules for your class year.'] },
+    { id: 'college', label: 'College and after', title: 'Plan the next step', items: [
+      'Track your stats and awards each season.',
+      'Learn how the College Draft and Allocation Draft work and what each requires.',
+      'Talk to a pro player or former pro about the first year.',
+      'Plan for work, school and income around a short season.',
+      'Keep one path you like open, such as coaching, training or media.'] }
+  ];
+  var gi = 0;
+  function renderGuide() {
+    var tabs = $('guideTabs');
+    tabs.innerHTML = '';
+    GUIDE.forEach(function (g, i) { tabs.appendChild(chip(g.label, i === gi, function () { gi = i; renderGuide(); })); });
+    var g = GUIDE[gi];
+    $('guideTitle').textContent = g.title;
+    var ul = $('guideList');
+    ul.innerHTML = '';
+    g.items.forEach(function (t) { var l = document.createElement('li'); l.textContent = t; ul.appendChild(l); });
+  }
+
+  var GSUBS = [['start', 'Start here'], ['timeline', 'Timeline'], ['email', 'Email a coach'], ['camps', 'Camps and showcases'], ['basics', 'Recruiting basics']];
+  var gsub = 'start';
+  function renderSubs() {
+    var wrap = $('guideSubTabs');
+    wrap.innerHTML = '';
+    GSUBS.forEach(function (s) { wrap.appendChild(chip(s[1], s[0] === gsub, function () { gsub = s[0]; renderSubs(); })); });
+    var panes = document.querySelectorAll('#guide [data-sub]');
+    for (var i = 0; i < panes.length; i++) { panes[i].hidden = panes[i].getAttribute('data-sub') !== gsub; }
+  }
+
+  /* Email templates. Used for the read-only samples and for the builder. */
+  var ETYPES = [['first', 'First email'], ['camp', 'Ask about a camp'], ['thanks', 'After a camp'], ['update', 'Update']];
+  function pv(vals, key, ph) {
+    var x = str(vals[key], 400).trim();
+    return x || '[' + ph + ']';
+  }
+  function buildEmail(vals, type) {
+    var name = pv(vals, 'name', 'Your name'), year = pv(vals, 'year', 'Grad year'), pos = pv(vals, 'pos', 'Position'),
+        hs = pv(vals, 'hs', 'High school'), club = pv(vals, 'club', 'Club team'), gpa = pv(vals, 'gpa', 'GPA'),
+        school = pv(vals, 'school', 'College'), coach = pv(vals, 'coach', 'Last name'), video = pv(vals, 'video', 'Link to your video'),
+        camp = pv(vals, 'camp', 'Camp name and date'), why = pv(vals, 'why', 'one real reason you like the program'),
+        note = pv(vals, 'note', 'something specific');
+    var ev = str(vals.events, 400).trim();
+    var events = ev ? 'I will be playing at ' + ev + '.' : '[Add your upcoming events, with dates and field locations.]';
+    var sig = name + '\n' + year + ' ' + pos + ', ' + hs + ' and ' + club;
+    var s, b;
+    if (type === 'camp') {
+      s = year + ' ' + pos + ', ' + name + ', question about ' + camp;
+      b = ['Hi Coach ' + coach + ',', '',
+        'My name is ' + name + '. I am a ' + year + ' ' + pos + ' at ' + hs + ' and I play club for ' + club + '. I am interested in ' + school + ' and I would like to attend ' + camp + '.', '',
+        'Could you tell me whether the coaching staff evaluates players at this camp, which session fits my position and graduation year, and what the fee covers?', '',
+        'My GPA is ' + gpa + '. Here is my skills video: ' + video, '',
+        'Thank you for your time,', sig].join('\n');
+    } else if (type === 'thanks') {
+      s = 'Thank you from ' + name + ', ' + year + ' ' + pos;
+      b = ['Hi Coach ' + coach + ',', '',
+        'Thank you for the chance to attend ' + camp + '. One thing I took away from camp: ' + note + '. I also enjoyed meeting the staff and the players.', '',
+        'I am still very interested in ' + school + '. Is there anything you would like me to work on? I would be glad to send an updated video or my schedule. ' + events, '',
+        'Thank you again,', sig].join('\n');
+    } else if (type === 'update') {
+      s = 'Update from ' + name + ', ' + year + ' ' + pos;
+      b = ['Hi Coach ' + coach + ',', '',
+        'I wanted to share an update since I last wrote. ' + note + '.', '',
+        'Here is my newest video: ' + video + ' ' + events, '',
+        'I am still very interested in ' + school + '. Thank you for your time.', '',
+        sig].join('\n');
+    } else {
+      s = year + ' ' + pos + ', ' + name + ', interested in ' + school + ' softball';
+      b = ['Hi Coach ' + coach + ',', '',
+        'My name is ' + name + '. I am a ' + year + ' ' + pos + ' at ' + hs + ' and I play club for ' + club + '. I am writing because I am very interested in ' + school + '\'s softball program, especially because ' + why + '.', '',
+        'My GPA is ' + gpa + '. Here is my skills video: ' + video, '',
+        events + ' If your schedule allows, I would love for you to see me play.', '',
+        'I would also appreciate any feedback on my video, and to hear whether you are recruiting my graduation year and position.', '',
+        'Thank you for your time,', sig].join('\n');
+    }
+    return { subject: s, body: b };
+  }
+  function renderTemplates() {
+    var wrap = $('tplList');
+    wrap.innerHTML = '';
+    ETYPES.forEach(function (t, i) {
+      var m = buildEmail({}, t[0]);
+      var d = document.createElement('details');
+      if (i === 0) { d.open = true; }
+      var sm = document.createElement('summary');
+      sm.textContent = t[1];
+      var box = document.createElement('div');
+      box.className = 'draft';
+      box.textContent = 'Subject: ' + m.subject + '\n\n' + m.body;
+      d.appendChild(sm); d.appendChild(box);
+      wrap.appendChild(d);
+    });
+    $('tplGo').addEventListener('click', function () { goPlan('email'); });
+  }
+
+  /* My plan: saved only in this browser (localStorage). Nothing is sent anywhere. */
+  var STORE = 'ondeck.v4.plan', OLD_STORE = 'ondeck.v3.plan';
+  var KINDS = ['Camp', 'Campus visit', 'Call or email with a coach', 'Other'], WITHOUT = ['', 'Yes', 'Maybe', 'No'];
+  var PF = [['pName', 'name'], ['pYear', 'year'], ['pPos', 'pos'], ['pHS', 'hs'], ['pClub', 'club'], ['pGPA', 'gpa'], ['pVideo', 'video']];
+  var BF = [['eSchool', 'school'], ['eCoach', 'coach'], ['eTo', 'to'], ['eCamp', 'camp'], ['eEvents', 'events'], ['eWhy', 'why'], ['eNote', 'note']];
+  var REPLIES = ['No reply yet', 'Replied', 'Asked for more info', 'Invited to visit or camp', 'Not a fit right now'];
+  var TYPE_IDS = ['first', 'camp', 'thanks', 'update'];
+  var state;
+  function blank() { return { profile: {}, checks: {}, emails: [], tracker: [], notes: [], builder: { type: 'first', id: '', f: {} } }; }
+  function cleanF(f) { var o = {}; BF.forEach(function (b) { o[b[1]] = str(f && f[b[1]], 400); }); return o; }
+  function adopt(d) {
+    var s = blank();
+    if (d && typeof d === 'object') {
+      PF.forEach(function (p) { s.profile[p[1]] = str(d.profile && d.profile[p[1]], 200); });
+      if (d.checks && typeof d.checks === 'object') {
+        Object.keys(d.checks).slice(0, 200).forEach(function (k) { if (d.checks[k] === true) { s.checks[k] = true; } });
+      }
+      if (Array.isArray(d.emails)) {
+        s.emails = d.emails.slice(0, 200).map(function (e) {
+          e = e || {};
+          return { id: str(e.id, 40) || uid(), type: TYPE_IDS.indexOf(e.type) > -1 ? e.type : 'first', subject: str(e.subject, 300), body: str(e.body, 5000),
+                   school: str(e.school, 200), coach: str(e.coach, 200), status: e.status === 'sent' ? 'sent' : 'draft', date: str(e.date, 20), f: cleanF(e.f) };
+        });
+      }
+      if (Array.isArray(d.tracker)) {
+        s.tracker = d.tracker.slice(0, 300).map(function (r) {
+          r = r || {};
+          return { id: str(r.id, 40) || uid(), school: str(r.school, 200), coach: str(r.coach, 200), emailed: str(r.emailed, 20),
+                   reply: REPLIES.indexOf(r.reply) > -1 ? r.reply : REPLIES[0], event: str(r.event, 200), next: str(r.next, 300) };
+        });
+      }
+      if (Array.isArray(d.notes)) {
+        s.notes = d.notes.slice(0, 200).map(function (r) {
+          r = r || {};
+          return { id: str(r.id, 40) || uid(), school: str(r.school, 200), kind: KINDS.indexOf(r.kind) > -1 ? r.kind : KINDS[0], date: str(r.date, 20), coach: str(r.coach, 200),
+                   liked: str(r.liked, 1000), study: str(r.study, 300), without: WITHOUT.indexOf(r.without) > -1 ? r.without : '', next: str(r.next, 500) };
+        });
+      }
+      if (d.builder && typeof d.builder === 'object') {
+        s.builder.type = TYPE_IDS.indexOf(d.builder.type) > -1 ? d.builder.type : 'first';
+        s.builder.id = str(d.builder.id, 40);
+        s.builder.f = cleanF(d.builder.f);
+      }
+    }
+    if (!s.builder.f.school && !Object.keys(s.builder.f).length) { s.builder.f = cleanF({}); }
+    state = s;
+  }
+  function readStore() {
+    adopt(null);
+    try { var raw = window.localStorage.getItem(STORE) || window.localStorage.getItem(OLD_STORE); if (raw) { adopt(JSON.parse(raw)); } } catch (e) { adopt(null); }
+  }
+  function say(m) { $('planStatus').textContent = m; }
+  function saveState() {
+    try { window.localStorage.setItem(STORE, JSON.stringify(state)); say('Saved on this device.'); }
+    catch (e) { say('This browser would not save your data. Use Download my data to keep a copy.'); }
+  }
+
+  var PSUBS = [['profile', 'Profile'], ['checklist', 'Checklist'], ['email', 'Email builder'], ['saved', 'Saved emails'], ['tracker', 'School tracker'], ['notes', 'School notes']];
+  var psub = 'profile';
+  function renderPlanTabs() {
+    var w = $('planTabs');
+    w.innerHTML = '';
+    PSUBS.forEach(function (s) {
+      var label = s[1];
+      if (s[0] === 'saved' && state.emails.length) { label += ' (' + state.emails.length + ')'; }
+      if (s[0] === 'tracker' && state.tracker.length) { label += ' (' + state.tracker.length + ')'; }
+      if (s[0] === 'notes' && state.notes.length) { label += ' (' + state.notes.length + ')'; }
+      w.appendChild(chip(label, s[0] === psub, function () { goPlan(s[0]); }));
+    });
+    var panes = document.querySelectorAll('#plan [data-plan]');
+    for (var i = 0; i < panes.length; i++) { panes[i].hidden = panes[i].getAttribute('data-plan') !== psub; }
+  }
+  function goPlan(sub) { psub = sub; renderPlanTabs(); }
+
+  /* Profile */
+  function fillProfile() { PF.forEach(function (p) { $(p[0]).value = state.profile[p[1]] || ''; }); }
+
+  /* Checklist */
+  var ci = 0;
+  function updateChkCount() {
+    var total = 0, done = 0;
+    GUIDE.forEach(function (g) { g.items.forEach(function (t, i) { total++; if (state.checks[g.id + ':' + i]) { done++; } }); });
+    $('chkCount').textContent = done + ' of ' + total + ' steps done across all ages';
+    $('chkBar').style.width = (total ? done / total * 100 : 0) + '%';
+  }
+  function renderChecklist() {
+    var tabs = $('chkTabs');
+    tabs.innerHTML = '';
+    GUIDE.forEach(function (g, i) { tabs.appendChild(chip(g.label, i === ci, function () { ci = i; renderChecklist(); })); });
+    var g = GUIDE[ci];
+    $('chkTitle').textContent = g.label + ': ' + g.title;
+    var ul = $('chkList');
+    ul.innerHTML = '';
+    g.items.forEach(function (t, i) {
+      var key = g.id + ':' + i, id = 'chk-' + g.id + '-' + i;
+      var li2 = document.createElement('li');
+      var lab = document.createElement('label'); lab.setAttribute('for', id);
+      var inp = document.createElement('input'); inp.type = 'checkbox'; inp.id = id; inp.checked = !!state.checks[key];
+      var sp = document.createElement('span'); sp.textContent = t;
+      inp.addEventListener('change', function () {
+        if (inp.checked) { state.checks[key] = true; } else { delete state.checks[key]; }
+        saveState(); updateChkCount();
+      });
+      lab.appendChild(inp); lab.appendChild(sp); li2.appendChild(lab); ul.appendChild(li2);
+    });
+    updateChkCount();
+  }
+
+  /* Email builder */
+  function fillBuilder() { BF.forEach(function (b) { $(b[0]).value = state.builder.f[b[1]] || ''; }); }
+  function vals() {
+    var o = {};
+    PF.forEach(function (p) { o[p[1]] = state.profile[p[1]] || ''; });
+    BF.forEach(function (b) { o[b[1]] = $(b[0]).value; });
+    return o;
+  }
+  function updateEmail() {
+    var v = vals(), m = buildEmail(v, state.builder.type);
+    $('emailSubject').textContent = m.subject;
+    $('emailBody').textContent = m.body;
+    var to = str(v.to, 200).replace(/[^A-Za-z0-9@._+\-,]/g, '');
+    $('emailMailto').href = 'mailto:' + to + '?subject=' + encodeURIComponent(m.subject) + '&body=' + encodeURIComponent(m.body);
+    var empty = PF.filter(function (p) { return !String(state.profile[p[1]] || '').trim(); }).length;
+    $('emailProfileNote').textContent = empty === PF.length ? 'Your profile is empty, so brackets show what is missing.' :
+      (empty ? 'Some profile details are missing and show in brackets.' : 'Filled in from your profile.');
+    BF.forEach(function (b) { state.builder.f[b[1]] = $(b[0]).value; });
+  }
+  function renderEmailTabs() {
+    var w = $('emailType');
+    w.innerHTML = '';
+    ETYPES.forEach(function (t) {
+      w.appendChild(chip(t[1], t[0] === state.builder.type, function () { state.builder.type = t[0]; saveState(); renderEmailTabs(); updateEmail(); }));
+    });
+  }
+  function emailIndex(id) {
+    for (var i = 0; i < state.emails.length; i++) { if (state.emails[i].id === id) { return i; } }
+    return -1;
+  }
+  function makeRecord(status) {
+    var v = vals(), m = buildEmail(v, state.builder.type);
+    return { id: '', type: state.builder.type, subject: m.subject, body: m.body, school: v.school.trim(), coach: v.coach.trim(),
+             status: status, date: today(), f: cleanF(state.builder.f) };
+  }
+  function storeRecord(status) {
+    var rec = makeRecord(status), idx = emailIndex(state.builder.id);
+    if (idx > -1) { rec.id = state.builder.id; state.emails[idx] = rec; }
+    else { rec.id = uid(); state.builder.id = rec.id; state.emails.push(rec); }
+    return rec;
+  }
+  function msg(t) { $('emailMsg').textContent = t; }
+
+  /* Saved emails */
+  var delId = '';
+  function renderSaved() {
+    var list = $('savedList');
+    list.innerHTML = '';
+    if (!state.emails.length) {
+      var p = document.createElement('p');
+      p.className = 'muted';
+      p.textContent = 'No saved emails yet. Build one in the Email builder and choose Save draft.';
+      list.appendChild(p);
+      return;
+    }
+    state.emails.slice().reverse().forEach(function (rec) {
+      var c = document.createElement('div'); c.className = 'card';
+      var h = document.createElement('h4'); h.textContent = rec.subject || '(no subject)';
+      var meta = document.createElement('p'); meta.className = 'muted'; meta.style.fontSize = '0.9rem';
+      var tl = ''; ETYPES.forEach(function (t) { if (t[0] === rec.type) { tl = t[1]; } });
+      meta.textContent = tl + (rec.school ? ' to ' + rec.school : '') + '. ' + (rec.status === 'sent' ? 'Sent ' : 'Draft saved ') + niceDate(rec.date) + '.';
+      var acts = document.createElement('div'); acts.className = 'row-actions';
+      if (delId === rec.id) {
+        var q = document.createElement('span'); q.textContent = 'Delete this email?';
+        var yes = document.createElement('button'); yes.type = 'button'; yes.className = 'btn btn-solid small'; yes.textContent = 'Yes, delete';
+        yes.addEventListener('click', function () {
+          state.emails = state.emails.filter(function (e) { return e.id !== rec.id; });
+          if (state.builder.id === rec.id) { state.builder.id = ''; }
+          delId = ''; saveState(); renderSaved(); renderPlanTabs();
+        });
+        var no = document.createElement('button'); no.type = 'button'; no.className = 'btn btn-out small'; no.textContent = 'Cancel';
+        no.addEventListener('click', function () { delId = ''; renderSaved(); });
+        acts.appendChild(q); acts.appendChild(yes); acts.appendChild(no);
+      } else {
+        var open = document.createElement('button'); open.type = 'button'; open.className = 'btn btn-solid small'; open.textContent = 'Open in builder';
+        open.addEventListener('click', function () {
+          state.builder.type = rec.type; state.builder.id = rec.id; state.builder.f = cleanF(rec.f);
+          saveState(); fillBuilder(); renderEmailTabs(); updateEmail(); goPlan('email');
+        });
+        acts.appendChild(open);
+        if (rec.status !== 'sent') {
+          var mk = document.createElement('button'); mk.type = 'button'; mk.className = 'btn btn-out small'; mk.textContent = 'Mark as sent';
+          mk.addEventListener('click', function () { rec.status = 'sent'; rec.date = today(); saveState(); renderSaved(); });
+          acts.appendChild(mk);
+        }
+        var del = document.createElement('button'); del.type = 'button'; del.className = 'btn btn-out small'; del.textContent = 'Delete';
+        del.addEventListener('click', function () { delId = rec.id; renderSaved(); });
+        acts.appendChild(del);
+      }
+      c.appendChild(h); c.appendChild(meta); c.appendChild(acts);
+      list.appendChild(c);
+    });
+  }
+
+  /* School tracker */
+  function trackSummary() {
+    var n = state.tracker.length;
+    var r = state.tracker.filter(function (t) { return t.reply !== REPLIES[0]; }).length;
+    $('trackCount').textContent = n ? n + (n === 1 ? ' school' : ' schools') + ' tracked, ' + r + ' with a reply or update.' : 'No schools yet. Add one to start.';
+  }
+  function renderTracker() {
+    var body = $('trackBody');
+    body.innerHTML = '';
+    state.tracker.forEach(function (row, idx) {
+      var tr = document.createElement('tr');
+      function cell(field, type, label) {
+        var td = document.createElement('td');
+        var inp = document.createElement('input'); inp.type = type; inp.className = 'tr-in'; inp.value = row[field] || '';
+        inp.setAttribute('aria-label', label + ', row ' + (idx + 1)); inp.autocomplete = 'off';
+        inp.addEventListener('input', function () { row[field] = inp.value; saveState(); });
+        td.appendChild(inp); tr.appendChild(td);
+      }
+      cell('school', 'text', 'School'); cell('coach', 'text', 'Coach'); cell('emailed', 'date', 'Date emailed');
+      var td = document.createElement('td');
+      var sel = document.createElement('select'); sel.className = 'tr-in'; sel.setAttribute('aria-label', 'Reply, row ' + (idx + 1));
+      REPLIES.forEach(function (r) { var o = document.createElement('option'); o.value = r; o.textContent = r; if (row.reply === r) { o.selected = true; } sel.appendChild(o); });
+      sel.addEventListener('change', function () { row.reply = sel.value; saveState(); trackSummary(); });
+      td.appendChild(sel); tr.appendChild(td);
+      cell('event', 'text', 'Camp or event'); cell('next', 'text', 'Next step');
+      var tdx = document.createElement('td');
+      var rm = document.createElement('button'); rm.type = 'button'; rm.className = 'btn btn-out small'; rm.textContent = 'Remove';
+      var armed = false;
+      rm.addEventListener('click', function () {
+        if (!armed) { armed = true; rm.textContent = 'Sure?'; return; }
+        state.tracker = state.tracker.filter(function (t) { return t.id !== row.id; });
+        saveState(); renderTracker(); renderPlanTabs();
+      });
+      rm.addEventListener('blur', function () { armed = false; rm.textContent = 'Remove'; });
+      tdx.appendChild(rm); tr.appendChild(tdx);
+      body.appendChild(tr);
+    });
+    trackSummary();
+  }
+
+  /* School notes */
+  function renderNotes() {
+    var list = $('noteList');
+    list.innerHTML = '';
+    var n = state.notes.length;
+    $('noteCount').textContent = n ? n + (n === 1 ? ' note' : ' notes') : 'No notes yet.';
+    state.notes.forEach(function (row, idx) {
+      var c = document.createElement('div'); c.className = 'card notecard';
+      var grid = document.createElement('div'); grid.className = 'form-grid';
+      function field(label, key, kind, wide) {
+        var l = document.createElement('label'); l.className = 'field' + (wide ? ' wide' : ''); l.appendChild(document.createTextNode(label));
+        var el;
+        if (kind === 'area') { el = document.createElement('textarea'); el.rows = 3; }
+        else if (kind === 'kind' || kind === 'without') {
+          el = document.createElement('select');
+          (kind === 'kind' ? KINDS : WITHOUT).forEach(function (v) { var o = document.createElement('option'); o.value = v; o.textContent = v || 'Choose one'; if (row[key] === v) { o.selected = true; } el.appendChild(o); });
+        } else { el = document.createElement('input'); el.type = kind === 'date' ? 'date' : 'text'; el.autocomplete = 'off'; }
+        if (kind !== 'kind' && kind !== 'without') { el.value = row[key] || ''; }
+        el.addEventListener(kind === 'kind' || kind === 'without' ? 'change' : 'input', function () { row[key] = el.value; saveState(); });
+        l.appendChild(el); grid.appendChild(l);
+      }
+      field('School', 'school', 'text'); field('What was it?', 'kind', 'kind');
+      field('Date', 'date', 'date'); field('Coach you talked to', 'coach', 'text');
+      field('What I liked', 'liked', 'area', true);
+      field('What I would study there', 'study', 'text', true);
+      field('Would I want to be at this school even without softball?', 'without', 'without', true);
+      field('What I need to do next', 'next', 'text', true);
+      var acts = document.createElement('div'); acts.className = 'row-actions';
+      var rm = document.createElement('button'); rm.type = 'button'; rm.className = 'btn btn-out small'; rm.textContent = 'Remove note';
+      var armed = false;
+      rm.addEventListener('click', function () {
+        if (!armed) { armed = true; rm.textContent = 'Sure?'; return; }
+        state.notes = state.notes.filter(function (t) { return t.id !== row.id; });
+        saveState(); renderNotes(); renderPlanTabs();
+      });
+      rm.addEventListener('blur', function () { armed = false; rm.textContent = 'Remove note'; });
+      acts.appendChild(rm);
+      c.appendChild(grid); c.appendChild(acts); list.appendChild(c);
+    });
+  }
+
+  function renderPlanAll() {
+    fillProfile(); fillBuilder(); renderChecklist(); renderEmailTabs(); updateEmail(); renderSaved(); renderTracker(); renderNotes(); renderPlanTabs();
+  }
+
+  function wirePlan() {
+    PF.forEach(function (p) {
+      var el = $(p[0]);
+      el.addEventListener('input', function () { state.profile[p[1]] = el.value; saveState(); updateEmail(); });
+    });
+    BF.forEach(function (b) {
+      $(b[0]).addEventListener('input', function () { updateEmail(); saveState(); });
+    });
+    $('emailGoProfile').addEventListener('click', function () { goPlan('profile'); });
+    $('emailSave').addEventListener('click', function () {
+      storeRecord(state.emails[emailIndex(state.builder.id)] ? state.emails[emailIndex(state.builder.id)].status : 'draft');
+      saveState(); renderSaved(); renderPlanTabs(); msg('Draft saved. Find it under Saved emails.');
+    });
+    $('emailReset').addEventListener('click', function () {
+      state.builder.id = ''; state.builder.f = cleanF({}); fillBuilder(); updateEmail(); saveState();
+      msg('Started a new email. Your profile details stay filled in.');
+    });
+    $('emailSent').addEventListener('click', function () {
+      var v = vals();
+      if (!v.school.trim()) { msg('Add the college name first so your tracker row has a name.'); $('eSchool').focus(); return; }
+      storeRecord('sent');
+      state.tracker.push({ id: uid(), school: v.school.trim(), coach: v.coach.trim(), emailed: today(), reply: REPLIES[0],
+                           event: (state.builder.type === 'camp' || state.builder.type === 'thanks') ? v.camp.trim() : '', next: 'Follow up in three weeks' });
+      saveState(); renderSaved(); renderTracker(); renderPlanTabs(); msg('Logged as sent and added to your School tracker.');
+    });
+    $('emailCopy').addEventListener('click', function () {
+      var text = 'Subject: ' + $('emailSubject').textContent + '\n\n' + $('emailBody').textContent;
+      function fallback() {
+        var r = document.createRange(); r.selectNodeContents($('emailBody'));
+        var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+        msg('Press Ctrl+C (Cmd+C on a Mac) to copy the selected email.');
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () { msg('Copied. Have a parent or guardian read it before you send it.'); }, fallback);
+      } else { fallback(); }
+    });
+    $('trackAdd').addEventListener('click', function () {
+      state.tracker.push({ id: uid(), school: '', coach: '', emailed: '', reply: REPLIES[0], event: '', next: '' });
+      saveState(); renderTracker(); renderPlanTabs();
+      var ins = $('trackBody').querySelectorAll('tr:last-child input');
+      if (ins.length) { ins[0].focus(); }
+    });
+    $('noteAdd').addEventListener('click', function () {
+      state.notes.push({ id: uid(), school: '', kind: KINDS[0], date: today(), coach: '', liked: '', study: '', without: '', next: '' });
+      saveState(); renderNotes(); renderPlanTabs();
+      var ins = $('noteList').querySelectorAll('.card:last-child input');
+      if (ins.length) { ins[0].focus(); }
+    });
+    $('planDownload').addEventListener('click', function () {
+      var blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = 'on-deck-my-plan.json';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+      say('Downloaded. Look for on-deck-my-plan.json in your downloads, and keep it somewhere safe.');
+    });
+    $('planUpload').addEventListener('change', function (e) {
+      var f = e.target.files && e.target.files[0];
+      if (!f) { return; }
+      var rd = new FileReader();
+      rd.onload = function () {
+        try { adopt(JSON.parse(rd.result)); renderPlanAll(); saveState(); say('Loaded your saved data. It replaced what was here.'); }
+        catch (err) { say('That file could not be read. Choose a file you downloaded from On Deck.'); }
+      };
+      rd.readAsText(f);
+      e.target.value = '';
+    });
+    $('planClear').addEventListener('click', function () { $('planConfirm').hidden = false; });
+    $('planClearNo').addEventListener('click', function () { $('planConfirm').hidden = true; });
+    $('planClearYes').addEventListener('click', function () {
+      adopt(null);
+      try { window.localStorage.removeItem(STORE); } catch (err) {}
+      $('planConfirm').hidden = true; renderPlanAll(); say('Your data was cleared from this browser.');
+    });
+  }
+
+  /* Menus and tab routing: each section is its own page, chosen by the URL hash */
+  var PAGES = ['home', 'quiz', 'pathways', 'spark', 'numbers', 'spotlights', 'mentors', 'guide', 'plan', 'compete', 'resources', 'dugout', 'coaches'];
+  function closeMenus() {
+    document.querySelectorAll('.gm').forEach(function (m) {
+      m.querySelector('.gp').hidden = true;
+      m.querySelector('.gb').setAttribute('aria-expanded', 'false');
+    });
+  }
+  function wireMenus() {
+    document.querySelectorAll('.gm').forEach(function (m) {
+      var b = m.querySelector('.gb'), p = m.querySelector('.gp');
+      b.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var open = b.getAttribute('aria-expanded') === 'true';
+        closeMenus();
+        if (!open) { p.hidden = false; b.setAttribute('aria-expanded', 'true'); }
+      });
+      p.addEventListener('click', function (e) { if (e.target.tagName === 'A') { closeMenus(); } });
+    });
+    document.addEventListener('click', function (e) { if (!e.target.closest || !e.target.closest('.gm')) { closeMenus(); } });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        var open = document.querySelector('.gb[aria-expanded="true"]');
+        closeMenus();
+        if (open) { open.focus(); }
+      }
+    });
+  }
+  function showPage() {
+    var h = (location.hash || '').replace('#', '');
+    if (PAGES.indexOf(h) < 0) { h = 'home'; }
+    var els = document.querySelectorAll('[data-page]');
+    for (var i = 0; i < els.length; i++) { els[i].hidden = els[i].getAttribute('data-page') !== h; }
+    document.querySelectorAll('#gnav a').forEach(function (a) {
+      if (a.getAttribute('href') === '#' + h) { a.setAttribute('aria-current', 'page'); } else { a.removeAttribute('aria-current'); }
+    });
+    document.querySelectorAll('.gm').forEach(function (m) {
+      m.querySelector('.gb').setAttribute('data-current', m.querySelector('a[aria-current]') ? 'true' : 'false');
+    });
+    closeMenus();
+    window.scrollTo(0, 0);
+  }
+  window.addEventListener('hashchange', showPage);
+
+  renderTabs(); renderPanel(); resetQuiz(); renderMentors(); renderGuide(); renderSubs(); renderTemplates(); renderSpot();
+  $('spotSel').addEventListener('change', function () { spotQ = +$('spotSel').value || 0; renderSpot(); });
+  renderDugout(); wireCompete();
+  readStore(); wirePlan(); renderPlanAll(); wireMenus(); showPage();
+})();
+</script>
